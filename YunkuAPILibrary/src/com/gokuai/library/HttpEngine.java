@@ -1,14 +1,10 @@
 package com.gokuai.library;
 
 
-import com.gokuai.library.util.URLEncoder;
 import com.gokuai.library.util.Util;
 import org.apache.http.util.TextUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.*;
 
 public abstract class HttpEngine {
     private final static String LOG_TAG = "HttpEngine";
@@ -74,18 +70,22 @@ public abstract class HttpEngine {
         int size = params.size();
         String string_to_sign = "";
 
+        //移除对应为null的参数
+        Iterator it = params.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            if (pair.getValue() == null||
+                    (ignoreKeys != null
+                            && ignoreKeys.contains(pair.getKey().toString()))) {
+                keys.remove(pair.getKey().toString());
+                it.remove();
+            }
+        }
+
         if (size > 0) {
             for (int i = 0; i < size - 1; i++) {
                 String key = keys.get(i);
-                if (ignoreKeys != null && ignoreKeys.contains(key)) {
-                    continue;
-                }
-
                 String value = params.get(key);
-                if (value == null) {
-                    continue;
-                }
-
                 string_to_sign += value + "\n";
             }
             string_to_sign += params.get(keys.get(size - 1));
@@ -95,27 +95,22 @@ public abstract class HttpEngine {
 
     /**
      * 重新根据参数进行签名
-     *
-     * @param params
+     *  @param params
      * @param secret
-     * @param needEncode
      */
-    protected void reSignParams(HashMap<String, String> params, String secret,
-                                boolean needEncode) {
-        reSignParams(params, secret, needEncode, new ArrayList<String>());
+    protected void reSignParams(HashMap<String, String> params, String secret) {
+        reSignParams(params, secret, new ArrayList<String>());
 
     }
 
     /**
      * 重新根据参数进行签名
-     *
-     * @param params
+     *  @param params
      * @param secret
-     * @param needEncode
      * @param ignoreKeys
      */
     protected void reSignParams(HashMap<String, String> params, String secret,
-                                boolean needEncode, ArrayList<String> ignoreKeys) {
+                                ArrayList<String> ignoreKeys) {
         params.remove("token");
         params.remove("sign");
         params.put("token", getToken());
