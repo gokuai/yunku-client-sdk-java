@@ -22,7 +22,7 @@ public class YunkuFile {
     private static final String TAG = "YunkuFile";
 
     static {
-        ConfigHelper.init();
+        new ConfigHelper().client("", "").config();
     }
 
     public static void main(String[] args) {
@@ -78,7 +78,7 @@ public class YunkuFile {
 
 //        getFileGroupPermission();
 
-//        getFileInfo();
+        getFileInfo();
 
 //        getFolderAttribute();
 
@@ -524,7 +524,7 @@ public class YunkuFile {
     /**
      * 获取文件链接
      */
-    static void getFileLink(){
+    static void getFileLink() {
         DebugFlag.logInfo(TAG, "====== getFileLink\n");
 
 //        String returnString = YKHttpEngine.getInstance().getFileLink("1111", 251025, "112");

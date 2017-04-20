@@ -7,9 +7,8 @@ import org.apache.http.util.TextUtils;
 import java.util.*;
 
 public abstract class HttpEngine {
-    private final static String LOG_TAG = "HttpEngine";
 
-    public final static int API_ID_VERSION = 0;
+    private final static String LOG_TAG = "HttpEngine";
 
 
     public final static int API_ID_GET_FILE_INFO = 50;
@@ -24,16 +23,20 @@ public abstract class HttpEngine {
 
     }
 
-    public abstract String getToken();
+    public String getToken() {
+        return token;
+    }
 
-    public abstract boolean refreshToken();
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
 
     public boolean isTokenAvailable() {
         return !TextUtils.isEmpty(token);
     }
 
     public static final int ERRORID_NETDISCONNECT = 1;
-    public static final int ERRORID_CHAT_SERVICE_NOT_LOGIN = 2;
 
     /**
      * 从服务器获得数据后的回调
@@ -74,7 +77,7 @@ public abstract class HttpEngine {
         Iterator it = params.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
-            if (pair.getValue() == null||
+            if (pair.getValue() == null ||
                     (ignoreKeys != null
                             && ignoreKeys.contains(pair.getKey().toString()))) {
                 keys.remove(pair.getKey().toString());
@@ -95,7 +98,8 @@ public abstract class HttpEngine {
 
     /**
      * 重新根据参数进行签名
-     *  @param params
+     *
+     * @param params
      * @param secret
      */
     protected void reSignParams(HashMap<String, String> params, String secret) {
@@ -105,7 +109,8 @@ public abstract class HttpEngine {
 
     /**
      * 重新根据参数进行签名
-     *  @param params
+     *
+     * @param params
      * @param secret
      * @param ignoreKeys
      */

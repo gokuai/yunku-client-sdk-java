@@ -16,8 +16,7 @@ public class YunkuLibrary {
     private static final String TAG = "YunkuLibrary";
 
     static {
-        ConfigHelper.init();
-
+        new ConfigHelper().client("","").config();
     }
 
     public static void main(String[] args) {

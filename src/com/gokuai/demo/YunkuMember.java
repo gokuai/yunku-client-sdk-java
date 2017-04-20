@@ -13,7 +13,7 @@ public class YunkuMember {
     private static final String TAG = "YunkuMember";
 
     static {
-        ConfigHelper.init();
+        new ConfigHelper().client("", "").config();
     }
 
     public static void main(String[] args) {

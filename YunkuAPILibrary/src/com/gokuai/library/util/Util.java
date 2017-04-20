@@ -831,6 +831,22 @@ public class Util {
         return true;
     }
 
+    /**
+     * 生成6个随机字符
+     *
+     * @return
+     */
+    public static String getSixRandomChars() {
+        String result = "";
+
+        for (int i = 0; i < 6; ++i) {
+            int intVal = (int) (Math.random() * 26 + 97);
+            result = result + (char) intVal;
+        }
+
+        return result;
+    }
+
 
 
 }

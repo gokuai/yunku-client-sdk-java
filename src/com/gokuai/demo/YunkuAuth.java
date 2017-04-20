@@ -17,7 +17,7 @@ public class YunkuAuth {
     private static final String TAG = "YunkuAuth";
 
     static {
-        ConfigHelper.init();
+        new ConfigHelper().client("","").config();
     }
 
     public static void main(String[] args) {

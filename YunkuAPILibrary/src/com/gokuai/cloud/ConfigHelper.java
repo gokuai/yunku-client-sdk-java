@@ -1,69 +1,130 @@
 package com.gokuai.cloud;
 
-
 import com.gokuai.library.util.DebugFlag;
 import org.apache.http.util.TextUtils;
 
+import java.net.Proxy;
+
 /**
- * Created by Brandon on 15/9/14.
- * <p>
- * <p>
  * 配置云库地址和client、secret
+ * Created by Brandon on 2017/4/19.
  */
 public class ConfigHelper {
 
+
     private final static String HTTPS = "https://";
-    public final static String HTTP = "http://";
+    private final static String HTTP = "http://";
+
+
+    private String mClientId;
+    private String mClientSecret;
+    private boolean mLogVisible;
+    private boolean mHttps;
+    private String mEntDomain;
+    private String mApiHost;
+    private String mWebHost;
+    private Proxy mProxy;
 
     /**
-     * 初始化网络请求的host
+     * 更改日志可见行
+     *
+     * @param visible
      */
-    public static void init() {
+    public ConfigHelper logVisible(boolean visible) {
+        mLogVisible = visible;
+        return this;
+    }
 
-        //https
-        YKConfig.SCHEME_PROTOCOL = YKConfig.HTTPS ? HTTPS : HTTP;
+    /**
+     * 更改企业域
+     */
+    public ConfigHelper domain(String entDomain) {
+        mEntDomain = entDomain;
+        return this;
+    }
+
+    /**
+     * 更改https
+     *
+     * @param https
+     */
+    public ConfigHelper https(boolean https) {
+        mHttps = https;
+        return this;
+    }
+
+    /**
+     * 更改API host
+     *
+     * @param apiHost
+     * @return
+     */
+    public ConfigHelper apiHost(String apiHost) {
+        mApiHost = apiHost;
+        return this;
+    }
+
+
+    /**
+     * 更改Web host
+     *
+     * @param webHost
+     * @return
+     */
+    public ConfigHelper webHost(String webHost) {
+        mWebHost = webHost;
+        return this;
+    }
+
+
+    /**
+     * 更改代理设置
+     *
+     * @param proxy
+     * @return
+     */
+    public ConfigHelper proxy(Proxy proxy) {
+
+        mProxy = proxy;
+        return this;
+    }
+
+
+    public ConfigHelper client(String clientId, String clientSecret) {
+        mClientId = clientId;
+        mClientSecret = clientSecret;
+        return this;
+    }
+
+    /**
+     * 配置参数
+     */
+    public void config() {
+        YKConfig.SCHEME_PROTOCOL = mHttps ? HTTPS : HTTP;
 
         // FIXME: 联系够快开发人员获取需要的CLIENT_ID，CLIENT_SECRET 参数
-        switch (YKConfig.SITE) {
-            case PUBLISH:
-                YKConfig.URL_API_HOST = "yk3-api.gokuai.com";
-                YKConfig.URL_HOST = "yk3.gokuai.com";
-                YKConfig.URL_UPDATE = YKConfig.SCHEME_PROTOCOL + "app3.gokuai.com";
-                YKConfig.CLIENT_ID = "";
-                YKConfig.CLIENT_SECRET = "";
-                break;
-            case PUBLISH_LINE_B:
-                YKConfig.URL_API_HOST = "yk3b-api.goukuai.cn";
-                YKConfig.URL_HOST = "yk3b.goukuai.cn";
-                YKConfig.URL_UPDATE = YKConfig.SCHEME_PROTOCOL + "app3.gokuai.com";
-                YKConfig.CLIENT_ID = "";
-                YKConfig.CLIENT_SECRET = "";
-                break;
-            case TEST:
-                YKConfig.URL_API_HOST = "yk3-api.goukuai.cn";
-                YKConfig.URL_HOST = "yk3.goukuai.cn";
-                YKConfig.URL_UPDATE = YKConfig.SCHEME_PROTOCOL + "app3.goukuai.cn";
-                YKConfig.CLIENT_ID = "";
-                YKConfig.CLIENT_SECRET = "";
-                break;
+
+        if (TextUtils.isEmpty(mApiHost)) {
+            YKConfig.URL_API_HOST = "yk3.gokuai.com/m-api";
+        } else {
+            YKConfig.URL_API_HOST = mApiHost;
         }
+
+        if (TextUtils.isEmpty(mWebHost)) {
+            YKConfig.URL_HOST = "yk3.gokuai.com";
+        } else {
+            YKConfig.URL_HOST = mWebHost;
+        }
+
+        YKConfig.CLIENT_ID = mClientId;
+        YKConfig.CLIENT_SECRET = mClientSecret;
 
         if (TextUtils.isEmpty(YKConfig.CLIENT_ID) || TextUtils.isEmpty(YKConfig.CLIENT_SECRET)) {
             throw new IllegalArgumentException("CLIENT_ID CLIENT_SECRET can not be empty!!");
         }
 
         String url = YKConfig.SCHEME_PROTOCOL + YKConfig.URL_HOST;
-        YKConfig.URL_OTHER_LOGIN = url + "/account/other_login";
-        YKConfig.URL_ENT = url + "/account/sso_login";
-        YKConfig.URL_REGISTER_ENT = url + "/ent/regist";
 
-        YKConfig.URL_OTHER_LOGIN_SINA = url + "/account/oauth?oauth=sina";
-        YKConfig.URL_OTHER_LOGIN_QQ = url + "/account/oauth?oauth=qq";
-        YKConfig.URL_OTHER_LOGIN_MD = url + "/account/oauth?oauth=mingdao";
-        YKConfig.URL_OTHER_LOGIN_SHJD = url + "/autologin/shsmu";
-        YKConfig.URL_OTHER_LOGIN_XDF = url + "/autologin/xdf";
-
-        YKConfig.URL_OSS_WEBSITE = url + "/account/sso?url=%s&token=%s&t=%s&n=%s&s=%s";
 
         YKConfig.URL_USER_AVATAR_FORMAT_BY_NAME = url + "/index/avatar?name=%s";
         YKConfig.URL_USER_AVATAR_FORMAT = url + "/index/avatar?id=%d&org_id=%d&name=%s";
@@ -71,13 +132,12 @@ public class ConfigHelper {
 
         YKConfig.FILE_THUMBNAIL_FORMAT = url + "/index/thumb?hash=%s&filehash=%s&type=%s&mount_id=%s";
 
-        YKConfig.URL_USER_FEEDBACK_HELP = url + "/help";
-        YKConfig.URL_USER_FEEDBACK_SUGGESTION = url + "/account/bbs_feedback";
-        YKConfig.URL_USER_FEEDBACK_BBS = url + "/account/bbs?id=";
+        YKConfig.URL_ACCOUNT_AUTO_LOGIN = url + "/account/autologin/entgrant?client_id=%s&ticket=%s&returnurl=%s&format=%s";
 
-        DebugFlag.LOG_VISIBLE = YKConfig.LOG_VISIBLE;
+        DebugFlag.LOG_VISIBLE = mLogVisible;
+        YKConfig.ENT_DOMAIN = mEntDomain;
+
+        //TODO 设置代理
 
     }
-
-
 }

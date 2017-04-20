@@ -30,11 +30,9 @@ import java.util.HashMap;
 public class YKHttpEngine extends HttpEngine {
 
     private final static String LOG_TAG = YKHttpEngine.class.getSimpleName();
-    private final static int MAX_PAGE_SIZE = 10000;
     private final static int FILE_SIZE_NONE = -1;
-    public final static int MESSAGE_SIZE = 50;
 
-    private String URL_API = YKConfig.SCHEME_PROTOCOL + YKConfig.URL_API_HOST;
+    protected String URL_API = YKConfig.SCHEME_PROTOCOL + YKConfig.URL_API_HOST;
     private String URL_OAUTH = URL_API + "/oauth2/token2";
 
     private static final String URL_API_GET_URL_BY_FILEHASH = "/1/file/get_url_by_filehash";
@@ -298,11 +296,6 @@ public class YKHttpEngine extends HttpEngine {
     }
 
 
-    public String getToken() {
-        return token;
-    }
-
-
     /**
      * 重新获得token
      */
@@ -313,8 +306,6 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("grant_type", "refresh_token");
         params.put("refresh_token", refreshToken);
-//        params.put("info", YKUtil.osInfo(YKConfig.CLIENT_ID));
-//        params.put("device", YKUtil.deviceUniqueId());
         params.put("client_id", YKConfig.CLIENT_ID);
         params.put("sign", generateSignOrderByKey(params));
 
@@ -357,8 +348,7 @@ public class YKHttpEngine extends HttpEngine {
             params.put("username", account);
             params.put("password", YKUtil.convert2MD532(password));
         }
-//        params.put("info", YKUtil.osInfo(YKConfig.CLIENT_ID));
-//        params.put("device", YKUtil.deviceUniqueId());
+
         params.put("client_id", YKConfig.CLIENT_ID);
         params.put("sign", generateSignOrderByKey(params));
 
@@ -396,6 +386,51 @@ public class YKHttpEngine extends HttpEngine {
         };
 
         return new RequestHelper().executeAsyncTask(thread, listener, API_ID_LOGIN);
+    }
+
+
+    /**
+     * 企业一站式登录
+     * @param account
+     * @param clientId
+     * @param clientSecret
+     * @return
+     */
+
+    public String ssoLogin(String account, String clientId, String clientSecret) {
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("account", account);
+        map.put("n", Util.getSixRandomChars());
+        map.put("t", Util.getUnixDateline() + "");
+        map.put("sign", generateSignOrderByKey(map, clientSecret));
+
+        String ticket = URLEncoder.encodeUTF8(Base64.encodeBytes(new Gson().toJson(map).getBytes()));
+        String url = String.format(YKConfig.URL_ACCOUNT_AUTO_LOGIN, clientId, ticket, "", "json");
+
+        return new RequestHelper().setParams(new HashMap<String, String>())
+                .setMethod(RequestMethod.POST).setUrl(url)
+                .executeSync();
+    }
+
+    /**
+     * 第三方登录
+     *
+     * @param key
+     */
+
+    public String otherMethodToLogin(String key) {
+        final HashMap<String, String> params = new HashMap<>();
+        params.put("gkkey", key);
+        params.put("grant_type", "gkkey");
+        params.put("client_id", YKConfig.CLIENT_ID);
+        params.put("sign", generateSignOrderByKey(params));
+
+        return new RequestHelper().setParams(params)
+                .setUrl(URL_API_EXCHANGE_TOKEN)
+                .setMethod(RequestMethod.POST)
+                .executeSync();
+
     }
 
 
@@ -3157,7 +3192,7 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 请求协助类
      */
-    private class RequestHelper {
+    protected class RequestHelper {
         RequestMethod method;
         HashMap<String, String> params;
         HashMap<String, String> headParams;

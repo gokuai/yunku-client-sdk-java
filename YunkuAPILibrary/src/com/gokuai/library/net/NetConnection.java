@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 public final class NetConnection {
 
     private static final String LOG_TAG = "NetConnection";
-    public static final String USER_AGENT = "GK_ANDROID" + ";" + System.getProperties().getProperty("http.agent");
+    public static final String USER_AGENT = "JAVA CLIENT SDK" + ";" + System.getProperties().getProperty("http.agent");
     public static final int READ_TIMEOUT = 30000;
     public static final int CONNECT_TIMEOUT = 10000;
 
