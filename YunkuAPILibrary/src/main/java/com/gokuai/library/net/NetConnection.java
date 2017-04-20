@@ -6,14 +6,10 @@ import com.gokuai.library.util.Base64;
 import com.gokuai.library.util.DebugFlag;
 import com.gokuai.library.util.Util;
 import com.google.gson.Gson;
-import com.squareup.okhttp.*;
+import okhttp3.*;
 import org.apache.http.util.TextUtils;
 
-import javax.net.ssl.*;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -130,43 +126,46 @@ public final class NetConnection {
         ArrayList<Protocol> list = new ArrayList<>();
         list.add(Protocol.HTTP_1_1);
         list.add(Protocol.HTTP_2);
-        OkHttpClient httpClient = new OkHttpClient();
-        final TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                    }
-
-                    @Override
-                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                    }
-
-                    @Override
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                }
-        };
-
-
-        try {
-            SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-            httpClient.setProtocols(list).setSslSocketFactory(sslSocketFactory).setHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            });
-
-            return httpClient;
-        } catch (KeyManagementException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
+        OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
+        if(!(YKConfig.PROXY == null)){
+            builder.proxy(YKConfig.PROXY);
         }
 
-        httpClient.setConnectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
-        httpClient.setReadTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS);
+//        final TrustManager[] trustAllCerts = new TrustManager[]{
+//                new X509TrustManager() {
+//                    @Override
+//                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+//                    }
+//
+//                    @Override
+//                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+//                    }
+//
+//                    @Override
+//                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+//                        return null;
+//                    }
+//                }
+//        };
+//
+//
+//        try {
+//            SSLContext sslContext = SSLContext.getInstance("SSL");
+//            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+//            final javax.net.ssl.SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+//            builder.protocols(list).socketFactory(sslSocketFactory).hostnameVerifier(new HostnameVerifier() {
+//                @Override
+//                public boolean verify(String s, SSLSession sslSession) {
+//                    return true;
+//                }
+//            });
+//
+//        } catch (KeyManagementException | NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//        }
+        builder.connectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
+        builder.readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS);
+        OkHttpClient httpClient = builder.build();
         return httpClient;
 
     }

@@ -6,7 +6,7 @@ import com.gokuai.library.data.ReturnResult;
 import com.gokuai.library.util.DebugFlag;
 import com.gokuai.library.util.URLEncoder;
 import com.gokuai.library.util.Util;
-import com.squareup.okhttp.*;
+import okhttp3.*;
 import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 

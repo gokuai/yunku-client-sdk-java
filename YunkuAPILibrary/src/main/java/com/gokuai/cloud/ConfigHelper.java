@@ -138,6 +138,10 @@ public class ConfigHelper {
         YKConfig.ENT_DOMAIN = mEntDomain;
 
         //TODO 设置代理
-
+        if (mProxy == null){
+            YKConfig.PROXY = null;
+        }else {
+            YKConfig.PROXY = mProxy;
+        }
     }
 }

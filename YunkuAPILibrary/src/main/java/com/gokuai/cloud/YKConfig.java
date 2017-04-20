@@ -3,6 +3,7 @@ package com.gokuai.cloud;
 import com.gokuai.library.Config;
 
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 
 
@@ -30,6 +31,8 @@ public class YKConfig extends Config {
     public static String SCHEME_PROTOCOL;
 
     public static String URL_ACCOUNT_AUTO_LOGIN;
+
+    public static Proxy PROXY;
 
     //====================================================
 
