@@ -27,23 +27,23 @@ public class YunkuSaveFile {
 
     public static void main(String[] args) {
 
-        loginBySso();
+        loginBySso("anpei", "024bcd3979f7cccbb8be41cd301b8b90","8bc4984196dc44b7ecc2428be2c79882");
 
         getMountList();
 
-        getFileList();
+        getFileList(1221861, "", 0, 500);
 
-        getFileListByHashs();
+        getFileListByHashs(1221861, 0, 500, new String[]{"913b52ae320f26b08a2b0108f1ca053f71cde781"});
 
-        addFile();
+        addFile(41792,"qp.JPG","9187d349dfeaa17059f9606b7864614b2df5af31",7376,1492697296,"");
     }
 
     /**
      * sso登录
      */
-    private static void loginBySso() {
+    private static void loginBySso(String account, String clientId, String clientSecret) {
 
-        String returnString = YKHttpEngine.getInstance().ssoLogin("[account]", "[clientId]", "[clientSecret]");
+        String returnString = YKHttpEngine.getInstance().ssoLogin(account, clientId, clientSecret);
         ReturnResult returnResult = ReturnResult.create(returnString);
         if (returnResult.getStatusCode() == 200) {
             try {
@@ -72,11 +72,11 @@ public class YunkuSaveFile {
     /**
      * 获取文件列表
      */
-    private static void getFileList() {
+    private static void getFileList(final int mountId, final String fullPath, int start, int size) {
 
         DebugFlag.logInfo(TAG, "====== getFileList\n");
 
-        String returnString = YKHttpEngine.getInstance().getFileListSync(251025, "", 0, 500);
+        String returnString = YKHttpEngine.getInstance().getFileListSync(mountId, fullPath, start, size);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -84,12 +84,12 @@ public class YunkuSaveFile {
     /**
      * 根据指定文件hash获取列表
      */
-    private static void getFileListByHashs() {
+    private static void getFileListByHashs(int mountId, int start, int size, String[] hashs) {
 
         DebugFlag.logInfo(TAG, "====== getFileListByHashs\n");
 
         String returnString = YKHttpEngine.getInstance()
-                .getFileListByHashs(251025, 0, 500, new String[]{"b24cae3429409c20cd20c80aa1c42e04f5aa8287"});
+                .getFileListByHashs(mountId, start, size, hashs);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -97,12 +97,12 @@ public class YunkuSaveFile {
     /**
      * 文件上传
      */
-    private static void addFile() {
+    private static void addFile(int mountId, String fullpath, String filehash, long filesize, long createDateline, String dialogId) {
 
         DebugFlag.logInfo(TAG, "====== addFile\n");
 
         String returnString = YKHttpEngine.getInstance()
-                .addFile(0,"","",100,111,"");
+                .addFile(mountId, fullpath, filehash, filesize, createDateline, dialogId);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }

@@ -71,7 +71,7 @@ public class MsMultiPartFormData {
     /**
      * Adds a upload file section to the request
      *
-     * @param fieldName name attribute in <input type="file" name="..." />
+     * @param fieldName name attribute in input type="file" name="..."
      * @throws IOException
      */
     public void addFilePart(String fieldName, InputStream inputStream, String fileName)
@@ -118,7 +118,6 @@ public class MsMultiPartFormData {
      *
      * @return a list of Strings as response in case the server returned
      *         status OK, otherwise an exception is thrown.
-     * @throws IOException
      */
     public String finish() {
         List<String> response = new ArrayList<String>();

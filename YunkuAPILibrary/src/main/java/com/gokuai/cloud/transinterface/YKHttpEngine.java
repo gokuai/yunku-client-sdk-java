@@ -330,7 +330,7 @@ public class YKHttpEngine extends HttpEngine {
 
 
     /**
-     * 账号密码登录,会根据{@link YKConfig.ENT_DOMAIN} 自动添加前缀
+     * 账号密码登录,会根据 com.gokuai.cloud.YKConfig.ENT_DOMAIN 自动添加前缀
      *
      * @param account
      * @param password
@@ -2904,31 +2904,19 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 新建文件、文件夹
      *
-     * @param mountId        文件柜id
-     * @param fullpath       文件路径
-     * @param filehash       文件hash
-     * @param filesize       文件大小
-     * @param createDateline
-     * @param dialogId
+     * @param mountId  文件柜id
+     * @param fullpath 文件路径
+     * @param filehash 文件hash
+     * @param filesize 文件大小
      */
-    public String addFile(int mountId, String fullpath, String filehash, long filesize, long createDateline, String dialogId) {
+    public String addFile(int mountId, String fullpath, String filehash, long filesize) {
         HashMap<String, String> params = new HashMap<>();
-        if (mountId != 0) {
-            params.put("mount_id", String.valueOf(mountId));
-        }
-
-        if (!TextUtils.isEmpty(dialogId)) {
-            params.put("dialog_id", dialogId);
-            params.put("ent_id", 301 + "");
-        }
+        params.put("mount_id", String.valueOf(mountId));
 
         params.put("fullpath", fullpath);
         params.put("filehash", filehash);
         params.put("filesize", String.valueOf(filesize));
         params.put("token", getToken());
-        if (createDateline != 0) {
-            params.put("create_dateline", String.valueOf(createDateline));
-        }
 
         ArrayList<String> ignoreKeys = new ArrayList<>();
         ignoreKeys.add("filehash");
@@ -2979,7 +2967,7 @@ public class YKHttpEngine extends HttpEngine {
      * @return
      */
     public String addLibraryFile(int mountId, String fullpath, String filehash, long filesize) {
-        return addFile(mountId, fullpath, filehash, filesize, 0, "");
+        return addFile(mountId, fullpath, filehash, filesize);
     }
 
     /**

@@ -131,42 +131,9 @@ public final class NetConnection {
             builder.proxy(YKConfig.PROXY);
         }
 
-//        final TrustManager[] trustAllCerts = new TrustManager[]{
-//                new X509TrustManager() {
-//                    @Override
-//                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-//                    }
-//
-//                    @Override
-//                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-//                    }
-//
-//                    @Override
-//                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-//                        return null;
-//                    }
-//                }
-//        };
-//
-//
-//        try {
-//            SSLContext sslContext = SSLContext.getInstance("SSL");
-//            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-//            final javax.net.ssl.SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-//            builder.protocols(list).socketFactory(sslSocketFactory).hostnameVerifier(new HostnameVerifier() {
-//                @Override
-//                public boolean verify(String s, SSLSession sslSession) {
-//                    return true;
-//                }
-//            });
-//
-//        } catch (KeyManagementException | NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        }
         builder.connectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
         builder.readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS);
-        OkHttpClient httpClient = builder.build();
-        return httpClient;
+        return builder.build();
 
     }
 

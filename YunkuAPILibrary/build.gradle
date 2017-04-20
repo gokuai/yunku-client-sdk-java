@@ -1,5 +1,4 @@
-group 'yunku-client-sdk-java'
-version '1.0-SNAPSHOT'
+group 'com.gokuai.client'
 
 apply plugin: 'java'
 

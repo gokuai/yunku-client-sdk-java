@@ -72,7 +72,7 @@ public class UploadRunnable implements Runnable {
             String filehash = Util.getFileSha1(mLocalFullPath);
             long filesize = file.length();
             ReturnResult returnResult = ReturnResult.create(YKHttpEngine.getInstance()
-                    .addFile(mMountId, fullpath, filehash, filesize, mDateline, ""));
+                    .addFile(mMountId, fullpath, filehash, filesize));
 
             FileOperationData data = FileOperationData.create(returnResult.getResult(), returnResult.getStatusCode());
 
@@ -218,7 +218,7 @@ public class UploadRunnable implements Runnable {
      * @param fullPath
      */
     private void upload_server(long filesize, String filehash, String fullPath) {
-        ReturnResult returnResult = ReturnResult.create(YKHttpEngine.getInstance().addFile(mMountId, fullPath, filehash, filesize, mDateline, ""));
+        ReturnResult returnResult = ReturnResult.create(YKHttpEngine.getInstance().addFile(mMountId, fullPath, filehash, filesize));
         FileOperationData data = FileOperationData.create(returnResult.getResult(), returnResult.getStatusCode());
         if (data != null) {
             mServer = data.getServer();

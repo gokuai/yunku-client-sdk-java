@@ -19,7 +19,7 @@ package com.gokuai.library.util;/*
  * <p>
  * Provides serialization and deserialization between a regular string and a base-64 encoded string.
  * </p>
- * 
+ *
  * <p>
  * This class was taken from Nabeel Mukhtar's github-java-sdk.
  * </p>
@@ -205,10 +205,10 @@ public class Base64 {
 
 	/**
 	 * Gets the alphabet.
-	 * 
+	 *
 	 * @param options
 	 *            the options
-	 * 
+	 *
 	 * @return the alphabet
 	 */
 	private final static byte[] getAlphabet(int options) {
@@ -223,10 +223,10 @@ public class Base64 {
 
 	/**
 	 * Gets the decodabet.
-	 * 
+	 *
 	 * @param options
 	 *            the options
-	 * 
+	 *
 	 * @return the decodabet
 	 */
 	private final static byte[] getDecodabet(int options) {
@@ -249,7 +249,7 @@ public class Base64 {
 
 	/**
 	 * Encode3to4.
-	 * 
+	 *
 	 * @param b4
 	 *            the b4
 	 * @param threeBytes
@@ -258,7 +258,7 @@ public class Base64 {
 	 *            the num sig bytes
 	 * @param options
 	 *            the options
-	 * 
+	 *
 	 * @return the byte[]
 	 */
 	private static byte[] encode3to4(byte[] b4, byte[] threeBytes, int numSigBytes, int options) {
@@ -268,7 +268,7 @@ public class Base64 {
 
 	/**
 	 * Encode3to4.
-	 * 
+	 *
 	 * @param source
 	 *            the source
 	 * @param srcOffset
@@ -281,7 +281,7 @@ public class Base64 {
 	 *            the dest offset
 	 * @param options
 	 *            the options
-	 * 
+	 *
 	 * @return the byte[]
 	 */
 	private static byte[] encode3to4(byte[] source, int srcOffset, int numSigBytes, byte[] destination, int destOffset, int options) {
@@ -330,7 +330,7 @@ public class Base64 {
 
 	/**
 	 * Encode.
-	 * 
+	 *
 	 * @param raw
 	 *            the raw
 	 * @param encoded
@@ -350,7 +350,7 @@ public class Base64 {
 
 	/**
 	 * Encode.
-	 * 
+	 *
 	 * @param raw
 	 *            the raw
 	 * @param encoded
@@ -372,13 +372,13 @@ public class Base64 {
 
 	/**
 	 * Encode object.
-	 * 
+	 *
 	 * @param serializableObject
 	 *            the serializable object
-	 * 
+	 *
 	 * @return the string
-	 * 
-	 * @throws IOException
+	 *
+	
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static String encodeObject(java.io.Serializable serializableObject) throws java.io.IOException {
@@ -387,15 +387,15 @@ public class Base64 {
 
 	/**
 	 * Encode object.
-	 * 
+	 *
 	 * @param serializableObject
 	 *            the serializable object
 	 * @param options
 	 *            the options
-	 * 
+	 *
 	 * @return the string
-	 * 
-	 * @throws IOException
+	 *
+	
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static String encodeObject(java.io.Serializable serializableObject, int options) throws java.io.IOException {
@@ -491,7 +491,7 @@ public class Base64 {
 	 *
 	 * @return the string
 	 *
-	 * @throws IOException
+	
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static String encodeBytes(byte[] source, int options) throws java.io.IOException {
@@ -538,7 +538,7 @@ public class Base64 {
 	 *
 	 * @return the string
 	 *
-	 * @throws IOException
+	
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static String encodeBytes(byte[] source, int off, int len, int options) throws java.io.IOException {
@@ -586,7 +586,7 @@ public class Base64 {
 	 *
 	 * @return the byte[]
 	 *
-	 * @throws IOException
+	
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static byte[] encodeBytesToBytes(byte[] source, int off, int len, int options) throws java.io.IOException {
@@ -786,7 +786,7 @@ public class Base64 {
 	 *
 	 * @return the byte[]
 	 *
-	 * @throws IOException
+	
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static byte[] decode(byte[] source) throws java.io.IOException {
@@ -813,7 +813,7 @@ public class Base64 {
 	 *
 	 * @return the byte[]
 	 *
-	 * @throws IOException
+	
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static byte[] decode(byte[] source, int off, int len, int options) throws java.io.IOException {
@@ -883,7 +883,7 @@ public class Base64 {
 	 *
 	 * @return the byte[]
 	 *
-	 * @throws IOException
+	
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static byte[] decode(String s) throws java.io.IOException {
@@ -900,7 +900,6 @@ public class Base64 {
 	 *
 	 * @return the byte[]
 	 *
-	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static byte[] decode(String s, int options) throws java.io.IOException {
@@ -980,7 +979,6 @@ public class Base64 {
 	 *
 	 * @return the object
 	 *
-	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 * @throws ClassNotFoundException
 	 *             the class not found exception
@@ -1001,7 +999,6 @@ public class Base64 {
 	 *
 	 * @return the object
 	 *
-	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 * @throws ClassNotFoundException
 	 *             the class not found exception
@@ -1069,7 +1066,6 @@ public class Base64 {
 	 * @param filename
 	 *            the filename
 	 *
-	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static void encodeToFile(byte[] dataToEncode, String filename) throws java.io.IOException {
@@ -1103,7 +1099,6 @@ public class Base64 {
 	 * @param filename
 	 *            the filename
 	 *
-	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static void decodeToFile(String dataToDecode, String filename) throws java.io.IOException {
@@ -1133,7 +1128,6 @@ public class Base64 {
 	 *
 	 * @return the byte[]
 	 *
-	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static byte[] decodeFromFile(String filename) throws java.io.IOException {
@@ -1187,7 +1181,6 @@ public class Base64 {
 	 *
 	 * @return the string
 	 *
-	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static String encodeFromFile(String filename) throws java.io.IOException {
@@ -1228,13 +1221,12 @@ public class Base64 {
 
 	/**
 	 * Encode file to file.
-	 * 
+	 *
 	 * @param infile
 	 *            the infile
 	 * @param outfile
 	 *            the outfile
-	 * 
-	 * @throws IOException
+	 *
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static void encodeFileToFile(String infile, String outfile) throws java.io.IOException {
@@ -1258,13 +1250,12 @@ public class Base64 {
 
 	/**
 	 * Decode file to file.
-	 * 
+	 *
 	 * @param infile
 	 *            the infile
 	 * @param outfile
 	 *            the outfile
-	 * 
-	 * @throws IOException
+	 *
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static void decodeFileToFile(String infile, String outfile) throws java.io.IOException {
@@ -1322,7 +1313,7 @@ public class Base64 {
 
 		/**
 		 * Instantiates a new input stream.
-		 * 
+		 *
 		 * @param in
 		 *            the in
 		 */
@@ -1332,7 +1323,7 @@ public class Base64 {
 
 		/**
 		 * Instantiates a new input stream.
-		 * 
+		 *
 		 * @param in
 		 *            the in
 		 * @param options
@@ -1353,7 +1344,7 @@ public class Base64 {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.io.FilterInputStream#read()
 		 */
 		@Override
@@ -1455,7 +1446,7 @@ public class Base64 {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.io.FilterInputStream#read(byte[], int, int)
 		 */
 		@Override
@@ -1517,7 +1508,7 @@ public class Base64 {
 
 		/**
 		 * Instantiates a new output stream.
-		 * 
+		 *
 		 * @param out
 		 *            the out
 		 */
@@ -1527,7 +1518,7 @@ public class Base64 {
 
 		/**
 		 * Instantiates a new output stream.
-		 * 
+		 *
 		 * @param out
 		 *            the out
 		 * @param options
@@ -1549,7 +1540,7 @@ public class Base64 {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.io.FilterOutputStream#write(int)
 		 */
 		@Override
@@ -1597,7 +1588,7 @@ public class Base64 {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.io.FilterOutputStream#write(byte[], int, int)
 		 */
 		@Override
@@ -1616,8 +1607,7 @@ public class Base64 {
 
 		/**
 		 * Flush base64.
-		 * 
-		 * @throws IOException
+		 *
 		 *             Signals that an I/O exception has occurred.
 		 */
 		public void flushBase64() throws java.io.IOException {
@@ -1635,7 +1625,7 @@ public class Base64 {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.io.FilterOutputStream#close()
 		 */
 		@Override
@@ -1653,8 +1643,7 @@ public class Base64 {
 
 		/**
 		 * Suspend encoding.
-		 * 
-		 * @throws IOException
+		 *
 		 *             Signals that an I/O exception has occurred.
 		 */
 		public void suspendEncoding() throws java.io.IOException {

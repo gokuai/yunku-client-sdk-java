@@ -73,22 +73,18 @@ public abstract class HttpEngine {
         int size = params.size();
         String string_to_sign = "";
 
-        //移除对应为null的参数
-        Iterator it = params.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            if (pair.getValue() == null ||
-                    (ignoreKeys != null
-                            && ignoreKeys.contains(pair.getKey().toString()))) {
-                keys.remove(pair.getKey().toString());
-                it.remove();
-            }
-        }
-
         if (size > 0) {
             for (int i = 0; i < size - 1; i++) {
                 String key = keys.get(i);
+                if (ignoreKeys != null && ignoreKeys.contains(key)) {
+                    continue;
+                }
+
                 String value = params.get(key);
+                if (value == null) {
+                    continue;
+                }
+
                 string_to_sign += value + "\n";
             }
             string_to_sign += params.get(keys.get(size - 1));

@@ -1,6 +1,5 @@
 package com.gokuai.demo.helper;
 
-import com.gokuai.cloud.YKConfig;
 import com.gokuai.cloud.transinterface.YKHttpEngine;
 
 /**

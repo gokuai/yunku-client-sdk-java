@@ -1,6 +1,5 @@
 package com.gokuai.demo.other;
 
-import com.gokuai.cloud.transinterface.YKHttpEngine;
 import com.gokuai.cloud.transinterface.YKHttpEngineExtraBase;
 import com.gokuai.library.net.RequestMethod;
 
