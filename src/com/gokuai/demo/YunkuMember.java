@@ -2,6 +2,7 @@ package com.gokuai.demo;
 
 import com.gokuai.cloud.ConfigHelper;
 import com.gokuai.cloud.transinterface.YKHttpEngine;
+import com.gokuai.demo.helper.ClientConfig;
 import com.gokuai.demo.helper.DeserializeHelper;
 import com.gokuai.demo.helper.YunkuAuthHelper;
 
@@ -13,7 +14,7 @@ public class YunkuMember {
     private static final String TAG = "YunkuMember";
 
     static {
-        new ConfigHelper().client("", "").config();
+        new ConfigHelper().client(ClientConfig.CLIENT_ID,ClientConfig.CLIENT_SECRET).config();
     }
 
     public static void main(String[] args) {

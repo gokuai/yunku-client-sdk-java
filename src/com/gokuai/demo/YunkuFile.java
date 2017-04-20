@@ -3,6 +3,7 @@ package com.gokuai.demo;
 import com.gokuai.cloud.ConfigHelper;
 import com.gokuai.cloud.Constants;
 import com.gokuai.cloud.transinterface.YKHttpEngine;
+import com.gokuai.demo.helper.ClientConfig;
 import com.gokuai.demo.helper.DeserializeHelper;
 import com.gokuai.demo.helper.YunkuAuthHelper;
 import com.gokuai.library.net.UploadCallBack;
@@ -22,7 +23,8 @@ public class YunkuFile {
     private static final String TAG = "YunkuFile";
 
     static {
-        new ConfigHelper().client("", "").config();
+        new ConfigHelper().client(ClientConfig.CLIENT_ID,ClientConfig.CLIENT_SECRET).config();
+
     }
 
     public static void main(String[] args) {
