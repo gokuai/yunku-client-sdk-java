@@ -391,6 +391,7 @@ public class YKHttpEngine extends HttpEngine {
 
     /**
      * 企业一站式登录
+     *
      * @param account
      * @param clientId
      * @param clientSecret
@@ -426,10 +427,20 @@ public class YKHttpEngine extends HttpEngine {
         params.put("client_id", YKConfig.CLIENT_ID);
         params.put("sign", generateSignOrderByKey(params));
 
-        return new RequestHelper().setParams(params)
+        String returnString = new RequestHelper().setParams(params)
                 .setUrl(URL_API_EXCHANGE_TOKEN)
                 .setMethod(RequestMethod.POST)
                 .executeSync();
+
+        ReturnResult returnResult = ReturnResult.create(returnString);
+        if (returnResult != null) {
+            OauthData data = OauthData.create(returnResult.getResult());
+            if (data != null) {
+                token = data.getToken();
+                refreshToken = data.getRefresh_token();
+            }
+        }
+        return returnString;
 
     }
 
