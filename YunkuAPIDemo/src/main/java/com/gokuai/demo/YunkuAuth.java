@@ -1,12 +1,12 @@
 package com.gokuai.demo;
 
+import com.gokuai.base.HttpEngine;
+import com.gokuai.base.LogPrint;
+import com.gokuai.base.ReturnResult;
 import com.gokuai.cloud.ConfigHelper;
 import com.gokuai.cloud.transinterface.YKHttpEngine;
 import com.gokuai.demo.helper.ClientConfig;
 import com.gokuai.demo.helper.DeserializeHelper;
-import com.gokuai.library.HttpEngine;
-import com.gokuai.library.data.ReturnResult;
-import com.gokuai.library.util.DebugFlag;
 
 /**
  * Created by Brandon on 2016/10/12.
@@ -36,7 +36,7 @@ public class YunkuAuth {
      */
     private static void loginByAccount() {
 
-        DebugFlag.logInfo(TAG, "====== loginByAccount\n");
+        LogPrint.info(TAG, "====== loginByAccount\n");
         //账号密码登录
         String returnString = YKHttpEngine.getInstance().loginSync("test", "test");
         DeserializeHelper.getInstance().deserializeResult(returnString);
@@ -48,7 +48,7 @@ public class YunkuAuth {
      */
     private static void loginByAccountAsync() {
 
-        DebugFlag.logInfo(TAG, "====== loginByAccountAsync\n");
+        LogPrint.info(TAG, "====== loginByAccountAsync\n");
 
         YKHttpEngine.getInstance().loginAsync("test", "test", new HttpEngine.DataListener() {
             @Override
@@ -56,7 +56,7 @@ public class YunkuAuth {
                 if (apiId == YKHttpEngine.API_ID_LOGIN) {
                     ReturnResult returnResult = ReturnResult.create(object.toString());
                     if (returnResult != null) {
-                        DebugFlag.logInfo(TAG, "onReceivedData => code" + returnResult.getStatusCode()
+                        LogPrint.info(TAG, "onReceivedData => code" + returnResult.getStatusCode()
                                 + "，result：" + returnResult.getResult());
                     }
                 }
@@ -71,7 +71,7 @@ public class YunkuAuth {
      */
     private static void refreshToken() {
 
-        DebugFlag.logInfo(TAG, "====== refreshToken\n");
+        LogPrint.info(TAG, "====== refreshToken\n");
 
         boolean success = YKHttpEngine.getInstance().refreshToken();
 

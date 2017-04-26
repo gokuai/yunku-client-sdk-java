@@ -1,7 +1,7 @@
 package com.gokuai.library.util;
 
-import com.gokuai.library.data.ReturnResult;
-import com.gokuai.library.net.NetConnection;
+import com.gokuai.base.NetConnection;
+import com.gokuai.base.ReturnResult;
 import com.google.gson.Gson;
 
 import java.io.*;

@@ -1,6 +1,6 @@
 package com.gokuai.demo.model;
 
-import com.gokuai.library.data.ReturnResult;
+import com.gokuai.base.ReturnResult;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

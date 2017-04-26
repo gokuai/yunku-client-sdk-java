@@ -1,11 +1,13 @@
 package com.gokuai.library.net;
 
+import com.gokuai.base.LogPrint;
+import com.gokuai.base.NetConnection;
+import com.gokuai.base.RequestMethod;
+import com.gokuai.base.ReturnResult;
+import com.gokuai.base.utils.URLEncoder;
+import com.gokuai.base.utils.Util;
 import com.gokuai.cloud.transinterface.YKHttpEngine;
 import com.gokuai.library.data.FileOperationData;
-import com.gokuai.library.data.ReturnResult;
-import com.gokuai.library.util.DebugFlag;
-import com.gokuai.library.util.URLEncoder;
-import com.gokuai.library.util.Util;
 import okhttp3.*;
 import org.apache.http.HttpStatus;
 import org.json.JSONObject;
@@ -64,7 +66,7 @@ public class UploadRunnable implements Runnable {
         try {
             File file = new File(mLocalFullPath);
             if (!file.exists()) {
-                DebugFlag.logInfo(LOG_TAG, "'" + mLocalFullPath + "'  file not exist!");
+                LogPrint.error(LOG_TAG, "'" + mLocalFullPath + "'  file not exist!");
                 return;
             }
             String filename = Util.getNameFromPath(fullpath).replace("/", "");
@@ -170,7 +172,7 @@ public class UploadRunnable implements Runnable {
             }
 
         } catch (Exception ex) {
-            DebugFlag.logInfo(LOG_TAG, ex.getMessage());
+            LogPrint.warn(LOG_TAG, ex.getMessage());
             upload_abort();
             if (mCallBack != null) {
                 mCallBack.onFail(mRId, ex.getMessage());
@@ -184,7 +186,7 @@ public class UploadRunnable implements Runnable {
                     bis.close();
                 }
             } catch (IOException e) {
-                DebugFlag.logInfo(LOG_TAG, "runnable with io exception:msg" + e.getMessage());
+                LogPrint.warn(LOG_TAG, "runnable with io exception:msg" + e.getMessage());
 
             }
 
@@ -293,7 +295,7 @@ public class UploadRunnable implements Runnable {
             returnResult.setStatusCode(response.code());
             response.body().close();
         } catch (Exception e) {
-            DebugFlag.logInfo(LOG_TAG, "upload_part(): Exception is: " + e.toString());
+            LogPrint.warn(LOG_TAG, "upload_part(): Exception is: " + e.toString());
         }
         return returnResult;
     }

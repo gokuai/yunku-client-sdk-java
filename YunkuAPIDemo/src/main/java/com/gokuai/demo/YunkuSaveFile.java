@@ -1,5 +1,7 @@
 package com.gokuai.demo;
 
+import com.gokuai.base.LogPrint;
+import com.gokuai.base.ReturnResult;
 import com.gokuai.cloud.ConfigHelper;
 import com.gokuai.cloud.transinterface.YKHttpEngine;
 import com.gokuai.demo.helper.ClientConfig;
@@ -7,8 +9,6 @@ import com.gokuai.demo.helper.DeserializeHelper;
 import com.gokuai.demo.model.FileData;
 import com.gokuai.demo.model.FileListData;
 import com.gokuai.demo.model.MountListData;
-import com.gokuai.library.data.ReturnResult;
-import com.gokuai.library.util.DebugFlag;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -76,7 +76,7 @@ public class YunkuSaveFile {
      */
     private static int selectMountFromList() {
 
-        DebugFlag.logInfo(TAG, "======selectMountList\n");
+        LogPrint.info(TAG, "======selectMountList\n");
 
         String returnString = YKHttpEngine.getInstance().getMountsInfo();
 
@@ -106,7 +106,7 @@ public class YunkuSaveFile {
      */
     private static FileData getFileDataForList(final int mountId, final String fullPath, int start, int size) {
 
-        DebugFlag.logInfo(TAG, "====== getFileList\n");
+        LogPrint.info(TAG, "====== getFileList\n");
 
         String returnString = YKHttpEngine.getInstance().getFileListSync(mountId, fullPath, start, size);
 
@@ -146,7 +146,7 @@ public class YunkuSaveFile {
      */
     private static void addFile(int mountId, String targetFullPath, String filehash, long filesize) {
 
-        DebugFlag.logInfo(TAG, "====== addFile\n");
+        LogPrint.info(TAG, "====== addFile\n");
 
         String returnString = YKHttpEngine.getInstance()
                 .addFile(mountId, targetFullPath, filehash, filesize);

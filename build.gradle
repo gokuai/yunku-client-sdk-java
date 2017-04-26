@@ -1,5 +1,9 @@
 allprojects {
     version = "3.0"
+
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
 }
 
 subprojects {

@@ -1,7 +1,8 @@
 package com.gokuai.demo.other;
 
+import com.gokuai.base.RequestMethod;
+import com.gokuai.cloud.YKConfig;
 import com.gokuai.cloud.transinterface.YKHttpEngineExtraBase;
-import com.gokuai.library.net.RequestMethod;
 
 import java.util.HashMap;
 
@@ -11,8 +12,8 @@ import java.util.HashMap;
  */
 public class YunkuOtherApiEngine extends YKHttpEngineExtraBase {
 
-    protected YunkuOtherApiEngine() {
-
+    protected YunkuOtherApiEngine(String clientId, String clientSecret) {
+        super(clientId, clientSecret);
     }
 
     private static volatile YunkuOtherApiEngine instance = null;
@@ -22,7 +23,7 @@ public class YunkuOtherApiEngine extends YKHttpEngineExtraBase {
         if (instance == null) {
             synchronized (YunkuOtherApiEngine.class) {
                 if (instance == null) {
-                    instance = new YunkuOtherApiEngine();
+                    instance = new YunkuOtherApiEngine(YKConfig.CLIENT_ID, YKConfig.CLIENT_SECRET);
                 }
             }
         }

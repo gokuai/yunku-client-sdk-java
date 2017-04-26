@@ -1,7 +1,7 @@
 package com.gokuai.demo.helper;
 
+import com.gokuai.base.ReturnResult;
 import com.gokuai.library.data.BaseData;
-import com.gokuai.library.data.ReturnResult;
 import org.apache.http.HttpStatus;
 
 /**

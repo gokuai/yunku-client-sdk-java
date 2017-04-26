@@ -1,5 +1,6 @@
 package com.gokuai.demo;
 
+import com.gokuai.base.LogPrint;
 import com.gokuai.cloud.ConfigHelper;
 import com.gokuai.cloud.Constants;
 import com.gokuai.cloud.transinterface.YKHttpEngine;
@@ -7,7 +8,6 @@ import com.gokuai.demo.helper.ClientConfig;
 import com.gokuai.demo.helper.DeserializeHelper;
 import com.gokuai.demo.helper.YunkuAuthHelper;
 import com.gokuai.library.net.UploadCallBack;
-import com.gokuai.library.util.DebugFlag;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -105,9 +105,9 @@ public class YunkuFile {
      * 锁定、解锁
      */
     static void lockFile() {
-        DebugFlag.logInfo(TAG, "======lockFile\n");
+        LogPrint.info(TAG, "======lockFile\n");
 
-        String returnString = YKHttpEngine.getInstance().lock("1111.gknote", 251025, 0);
+        String returnString = YKHttpEngine.getInstance().lock("test.jpg", 1221861, 0);
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
     }
@@ -116,9 +116,9 @@ public class YunkuFile {
      * 文件最近更新列表
      */
     static void getFileUpdates() {
-        DebugFlag.logInfo(TAG, "====== getFileUpdates\n");
+        LogPrint.info(TAG, "====== getFileUpdates\n");
 
-        String returnString = YKHttpEngine.getInstance().getFileUpdates(251025, 0, 500);
+        String returnString = YKHttpEngine.getInstance().getFileUpdates(1221861, 0, 500);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -127,9 +127,9 @@ public class YunkuFile {
      * 设置文件描述
      */
     static void setFileKeyWord() {
-        DebugFlag.logInfo(TAG, "====== setFileKeyWord\n");
+        LogPrint.info(TAG, "====== setFileKeyWord\n");
 
-        String returnString = YKHttpEngine.getInstance().setFileKeyWord(251025, "1111", "test 1");
+        String returnString = YKHttpEngine.getInstance().setFileKeyWord(1221861, "test.jpg", "test 1");
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -138,9 +138,9 @@ public class YunkuFile {
      * 获取收藏夹信息
      */
     static void getFavorInfo() {
-        DebugFlag.logInfo(TAG, "====== getFavorInfo\n");
+        LogPrint.info(TAG, "====== getFavorInfo\n");
 
-        String returnString = YKHttpEngine.getInstance().getFavoriteInfo(0);
+        String returnString = YKHttpEngine.getInstance().getFavoriteInfo(1);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -149,9 +149,9 @@ public class YunkuFile {
      * 添加收藏
      */
     static void addFavor() {
-        DebugFlag.logInfo(TAG, "====== addFavor\n");
+        LogPrint.info(TAG, "====== addFavor\n");
 
-        String returnString = YKHttpEngine.getInstance().addFavorities(251025, "1111", 1);
+        String returnString = YKHttpEngine.getInstance().addFavorities(1221861, "test.jpg", 1);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -160,9 +160,9 @@ public class YunkuFile {
      * 删除收藏
      */
     static void deleteFavor() {
-        DebugFlag.logInfo(TAG, "====== deleteFavor\n");
+        LogPrint.info(TAG, "====== deleteFavor\n");
 
-        String returnString = YKHttpEngine.getInstance().delFavorities(251025, "1111", 1);
+        String returnString = YKHttpEngine.getInstance().delFavorities(1221861, "test.jpg", 1);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -171,7 +171,7 @@ public class YunkuFile {
      * 清空收藏
      */
     static void clearFavor() {
-        DebugFlag.logInfo(TAG, "====== clearFavor\n");
+        LogPrint.info(TAG, "====== clearFavor\n");
 
         String returnString = YKHttpEngine.getInstance().clearFavorities();
 
@@ -182,7 +182,7 @@ public class YunkuFile {
      * 获取24小时内修改的文件
      */
     static void getFileRecentModified() {
-        DebugFlag.logInfo(TAG, "====== getFileRecentModified\n");
+        LogPrint.info(TAG, "====== getFileRecentModified\n");
 
         String returnString = YKHttpEngine.getInstance().getFileRecentModified();
 
@@ -193,7 +193,7 @@ public class YunkuFile {
      * 获取锁定文件信息
      */
     static void getFilesLocked() {
-        DebugFlag.logInfo(TAG, "====== getFilesLocked\n");
+        LogPrint.info(TAG, "====== getFilesLocked\n");
 
         String returnString = YKHttpEngine.getInstance().getFileLocked();
 
@@ -205,9 +205,9 @@ public class YunkuFile {
      * 获取文件（夹）信息
      */
     static void getFileInfo() {
-        DebugFlag.logInfo(TAG, "====== getFileInfo\n");
+        LogPrint.info(TAG, "====== getFileInfo\n");
 
-        String returnString = YKHttpEngine.getInstance().getFileInfoSync("工作积累/我的够快/团队的文件/开发部相关/测试部门文档/产品工作流程.doc", 394234, "");
+        String returnString = YKHttpEngine.getInstance().getFileInfoSync("Folder Test", 1221861, "");
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -216,9 +216,9 @@ public class YunkuFile {
      * 获取文件列表
      */
     static void getFileList() {
-        DebugFlag.logInfo(TAG, "====== getFileList\n");
+        LogPrint.info(TAG, "====== getFileList\n");
 
-        String returnString = YKHttpEngine.getInstance().getFileListSync(251025, "", 0, 500);
+        String returnString = YKHttpEngine.getInstance().getFileListSync(1221861, "", 0, 500);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
@@ -228,10 +228,10 @@ public class YunkuFile {
      * 根据指定文件hash获取列表
      */
     static void getFileListByHashs() {
-        DebugFlag.logInfo(TAG, "====== getFileListByHashs\n");
+        LogPrint.info(TAG, "====== getFileListByHashs\n");
 
         String returnString = YKHttpEngine.getInstance()
-                .getFileListByHashs(251025, 0, 500, new String[]{"b24cae3429409c20cd20c80aa1c42e04f5aa8287"});
+                .getFileListByHashs(1221861, 0, 500, new String[]{"bac8f214d6dc064a2b758aa0c1aae11f582dffd4"});
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -240,10 +240,10 @@ public class YunkuFile {
      * 文件上传 （表单上传）
      */
     static void fileUploadMSMulti() {
-        DebugFlag.logInfo(TAG, "====== fileUploadMSMulti\n");
+        LogPrint.info(TAG, "====== fileUploadMSMulti\n");
 
-        String returnString = YKHttpEngine.getInstance().uploadFile(46855,
-                "1.xlsx", "Brandon", "/Users/Brandon/Desktop/1.xlsx", false);
+        String returnString = YKHttpEngine.getInstance().uploadFile(1221861,
+                "test.jpg", "Brandon", "YunkuAPIDemo/testData/test.jpg", false);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
@@ -280,12 +280,12 @@ public class YunkuFile {
      * 文件删除
      */
     static void fileDelete() {
-        DebugFlag.logInfo(TAG, "====== fileDelete\n");
+        LogPrint.info(TAG, "====== fileDelete\n");
 
         ArrayList<String> fullPaths = new ArrayList<>();
-        fullPaths.add("TestImg.png");
+        fullPaths.add("test.jpg");
 
-        String returnString = YKHttpEngine.getInstance().batchDeleteFileAsync(251025, fullPaths);
+        String returnString = YKHttpEngine.getInstance().batchDeleteFileAsync(1221861, fullPaths);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -294,12 +294,12 @@ public class YunkuFile {
      * 文件复制
      */
     static void fileCopy() {
-        DebugFlag.logInfo(TAG, "====== fileCopy\n");
+        LogPrint.info(TAG, "====== fileCopy\n");
 
         ArrayList<String> fullPaths = new ArrayList<>();
-        fullPaths.add("TestImg.png");
+        fullPaths.add("v2.png");
 
-        String returnString = YKHttpEngine.getInstance().fileBatchCopy(251025, fullPaths, 251025, "");
+        String returnString = YKHttpEngine.getInstance().fileBatchCopy(1221861, fullPaths, 1221861, "");
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -308,12 +308,12 @@ public class YunkuFile {
      * 文件移动
      */
     static void fileMove() {
-        DebugFlag.logInfo(TAG, "====== fileMove\n");
+        LogPrint.info(TAG, "====== fileMove\n");
 
         ArrayList<String> fullPaths = new ArrayList<>();
-        fullPaths.add("TestImg.png");
+        fullPaths.add("v2.png");
 
-        String returnString = YKHttpEngine.getInstance().fileBatchMove(251025, fullPaths, 251025, "");
+        String returnString = YKHttpEngine.getInstance().fileBatchMove(1221861, fullPaths, 1221861, "");
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
@@ -323,9 +323,9 @@ public class YunkuFile {
      * 恢复已删除文件
      */
     static void fileRevert() {
-        DebugFlag.logInfo(TAG, "====== fileRevert\n");
+        LogPrint.info(TAG, "====== fileRevert\n");
 
-        String returnString = YKHttpEngine.getInstance().revert("TestImg.png", 251025, "AVe9Q19xn7vtXv-L4a_K");
+        String returnString = YKHttpEngine.getInstance().revert("v3.JPG", 1221861, "AVr6abVdUgJYxGotInU4");
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
     }
@@ -334,17 +334,17 @@ public class YunkuFile {
      * 设置收藏夹名称
      */
     static void setFavorName() {
-        DebugFlag.logInfo(TAG, "====== setFavorName\n");
+        LogPrint.info(TAG, "====== setFavorName\n");
 
         String returnString = YKHttpEngine.getInstance().changeFavoritesName(1, "test2");
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
 
     /**
-     * 获取收藏家名称
+     * 获取收藏夹名称
      */
     static void getFavorName() {
-        DebugFlag.logInfo(TAG, "====== getFavorName\n");
+        LogPrint.info(TAG, "====== getFavorName\n");
 
         String returnString = YKHttpEngine.getInstance().getFavoritesName();
         DeserializeHelper.getInstance().deserializeResult(returnString);
@@ -354,9 +354,9 @@ public class YunkuFile {
      * 获取文件下载链接
      */
     static void getUrlByFileHash() {
-        DebugFlag.logInfo(TAG, "====== getUrlByFileHash\n");
+        LogPrint.info(TAG, "====== getUrlByFileHash\n");
 
-        String returnString = YKHttpEngine.getInstance().getDownloadFileUrlByFileHash(251025, "fd9e194c7e82aeb25c6b3e857e631680a19df3b2");
+        String returnString = YKHttpEngine.getInstance().getDownloadFileUrlByFileHash(1221861, "b5b7dd1ec6afd6d135f80f367068748d489e37a5");
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
 
@@ -365,7 +365,7 @@ public class YunkuFile {
      */
     static void setFilePermission() {
 
-        DebugFlag.logInfo(TAG, "====== setFilePermission\n");
+        LogPrint.info(TAG, "====== setFilePermission\n");
 
         ArrayList<String> permissionSetting = new ArrayList<>();
         permissionSetting.add(Constants.FILE_DELETE);
@@ -375,7 +375,7 @@ public class YunkuFile {
         HashMap<Integer, Object> map = new HashMap<>();
         map.put(2208, permissionSetting);
 
-        String returnString = YKHttpEngine.getInstance().setFilePermission(251025, "1111", new Gson().toJson(map), false);
+        String returnString = YKHttpEngine.getInstance().setFilePermission(1221861, "v2.png", new Gson().toJson(map), false);
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
         //group
@@ -390,9 +390,9 @@ public class YunkuFile {
      * 获取文件成员权限
      */
     static void getFileMemberPermission() {
-        DebugFlag.logInfo(TAG, "====== getFileMemberPermission\n");
+        LogPrint.info(TAG, "====== getFileMemberPermission\n");
 
-        String returnString = YKHttpEngine.getInstance().getMemberFolderPermission(251025, "1111", 0, 500);
+        String returnString = YKHttpEngine.getInstance().getMemberFolderPermission(1221861, "1111", 0, 500);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
@@ -403,9 +403,9 @@ public class YunkuFile {
      * 获取文件部门权限
      */
     static void getFileGroupPermission() {
-        DebugFlag.logInfo(TAG, "====== getFileGroupPermission\n");
+        LogPrint.info(TAG, "====== getFileGroupPermission\n");
 
-        String returnString = YKHttpEngine.getInstance().getGroupFolderPermission(251025, "1111", 0, 500);
+        String returnString = YKHttpEngine.getInstance().getGroupFolderPermission(1221861, "Folder Test", 0, 500);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -414,9 +414,9 @@ public class YunkuFile {
      * 获取文件夹属性
      */
     static void getFolderAttribute() {
-        DebugFlag.logInfo(TAG, "====== getFolderAttribute\n");
+        LogPrint.info(TAG, "====== getFolderAttribute\n");
 
-        String returnString = YKHttpEngine.getInstance().getFolderAttribute(251025, "1111", "");
+        String returnString = YKHttpEngine.getInstance().getFolderAttribute(1221861, "Folder Test", "");
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -425,9 +425,9 @@ public class YunkuFile {
      * 打开文件
      */
     static void getFileOpen() {
-        DebugFlag.logInfo(TAG, "====== getFileOpen\n");
+        LogPrint.info(TAG, "====== getFileOpen\n");
 
-        String returnString = YKHttpEngine.getInstance().getDownloadFileUrlByPath(251025, "1111.gknote", "");
+        String returnString = YKHttpEngine.getInstance().getDownloadFileUrlByPath(1221861, "v2.png", "");
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
@@ -437,9 +437,9 @@ public class YunkuFile {
      * 文件是否存在
      */
     static void fileExist() {
-        DebugFlag.logInfo(TAG, "====== fileExistByHash\n");
+        LogPrint.info(TAG, "====== fileExistByHash\n");
 
-        String returnString = YKHttpEngine.getInstance().fileExistByHash("b24cae3429409c20cd20c80aa1c42e04f5aa8287", 251025);
+        String returnString = YKHttpEngine.getInstance().fileExistByHash("279fbbe805d7dc4ef4d65ae7a8819b1f2beb3622", 1221861);
 //        String returnString = YKHttpEngine.getInstance().fileExistByFullPath("1111.gknote", 251025);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
@@ -449,9 +449,9 @@ public class YunkuFile {
      * 创建文件夹
      */
     static void createFolder() {
-        DebugFlag.logInfo(TAG, "====== createFolder\n");
+        LogPrint.info(TAG, "====== createFolder\n");
 
-        String returnString = YKHttpEngine.getInstance().createFolder(251025, "Folder Test");
+        String returnString = YKHttpEngine.getInstance().createFolder(1221861, "Folder Test1");
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
@@ -462,9 +462,9 @@ public class YunkuFile {
      * 获取文件历史操作列表
      */
     static void getFileHistory() {
-        DebugFlag.logInfo(TAG, "====== createFolder\n");
+        LogPrint.info(TAG, "====== getFileHistory\n");
 
-        String returnString = YKHttpEngine.getInstance().getHistory(251025, "TestImg.png");
+        String returnString = YKHttpEngine.getInstance().getHistory(1221861, "v2.png");
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
@@ -474,7 +474,7 @@ public class YunkuFile {
      * 文件转存
      */
     static void fileSave() {
-        DebugFlag.logInfo(TAG, "====== fileSave\n");
+        LogPrint.info(TAG, "====== fileSave\n");
 
         String returnString = YKHttpEngine.getInstance().fileSave(251025, "TestImg.png", "1111", 0, 251025, "");
 
@@ -485,7 +485,7 @@ public class YunkuFile {
      * 文件搜索
      */
     static void fileSearch() {
-        DebugFlag.logInfo(TAG, "====== fileSearch\n");
+        LogPrint.info(TAG, "====== fileSearch\n");
 
         String returnString = YKHttpEngine.getInstance().fileSearch("doc", 0);
         DeserializeHelper.getInstance().deserializeResult(returnString);
@@ -495,8 +495,8 @@ public class YunkuFile {
      * 添加文件备注
      */
     static void addFileRemark() {
-        DebugFlag.logInfo(TAG, "====== addFileRemark\n");
-        String returnString = YKHttpEngine.getInstance().addFileRemark(251025, "1111", "remark test");
+        LogPrint.info(TAG, "====== addFileRemark\n");
+        String returnString = YKHttpEngine.getInstance().addFileRemark(1221861, "v2.png", "remark test");
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
 
@@ -504,9 +504,9 @@ public class YunkuFile {
      * 获取文件备注
      */
     static void getFileRemark() {
-        DebugFlag.logInfo(TAG, "====== getFileRemark\n");
+        LogPrint.info(TAG, "====== getFileRemark\n");
 
-        String returnString = YKHttpEngine.getInstance().getFileRemarkList(251025, "1111", 0, 500);
+        String returnString = YKHttpEngine.getInstance().getFileRemarkList(1221861, "v2.png", 0, 500);
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
 
@@ -516,9 +516,9 @@ public class YunkuFile {
      * 文件重命名
      */
     static void fileRename() {
-        DebugFlag.logInfo(TAG, "====== fileRename\n");
+        LogPrint.info(TAG, "====== fileRename\n");
 
-        String returnString = YKHttpEngine.getInstance().renameFile("1111", 251025, "112");
+        String returnString = YKHttpEngine.getInstance().renameFile("v3", 1221861, "v3.JPG");
         DeserializeHelper.getInstance().deserializeResult(returnString);
 
     }
@@ -527,7 +527,7 @@ public class YunkuFile {
      * 获取文件链接
      */
     static void getFileLink() {
-        DebugFlag.logInfo(TAG, "====== getFileLink\n");
+        LogPrint.info(TAG, "====== getFileLink\n");
 
 //        String returnString = YKHttpEngine.getInstance().getFileLink("1111", 251025, "112");
 //        DeserializeyHelpder.getInstance().deserializeResult(returnString);

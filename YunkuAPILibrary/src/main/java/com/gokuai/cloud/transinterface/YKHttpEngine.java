@@ -1,16 +1,17 @@
 package com.gokuai.cloud.transinterface;
 
+import com.gokuai.base.*;
+import com.gokuai.base.utils.Base64;
+import com.gokuai.base.utils.URLEncoder;
+import com.gokuai.base.utils.Util;
 import com.gokuai.cloud.Constants;
 import com.gokuai.cloud.YKConfig;
 import com.gokuai.cloud.data.OauthData;
-import com.gokuai.library.HttpEngine;
 import com.gokuai.library.data.BaseData;
-import com.gokuai.library.data.ReturnResult;
-import com.gokuai.library.net.NetConnection;
-import com.gokuai.library.net.RequestMethod;
 import com.gokuai.library.net.UploadCallBack;
 import com.gokuai.library.net.UploadRunnable;
-import com.gokuai.library.util.*;
+import com.gokuai.library.util.EmojiMapUtil;
+import com.gokuai.library.util.MsMultiPartFormData;
 import com.google.gson.Gson;
 import org.apache.http.util.TextUtils;
 import org.json.JSONObject;
@@ -34,6 +35,9 @@ public class YKHttpEngine extends HttpEngine {
 
     protected String URL_API = YKConfig.SCHEME_PROTOCOL + YKConfig.URL_API_HOST;
     private String URL_OAUTH = URL_API + "/oauth2/token2";
+
+    protected String token;
+    protected String refreshToken;
 
     private static final String URL_API_GET_URL_BY_FILEHASH = "/1/file/get_url_by_filehash";
     private static final String URL_API_OPEN = "/2/file/open";
@@ -157,6 +161,9 @@ public class YKHttpEngine extends HttpEngine {
     public final static int API_ID_FILELOCAL = 19;
     public final static int API_ID_BATCH_DELETE = 34;
 
+    public final static int API_ID_GET_URL_BY_HASH = 49;
+    public final static int API_ID_GET_FILE_INFO = 50;
+
     public final static int API_ID_OTHER_METHOD_LOGIN = 51;
 
     public final static int API_ID_QUIT_LIB = 87;
@@ -244,8 +251,8 @@ public class YKHttpEngine extends HttpEngine {
     public final static int API_ID_UPDATE_CONTACT_MEMBER_STATE = 198;
     public final static int API_ID_SEND_FILE_WITH_CONTENT = 199;
 
-    protected YKHttpEngine() {
-
+    protected YKHttpEngine(String clientId, String clientSecret) {
+        super(clientId, clientSecret);
     }
 
     private static volatile YKHttpEngine instance = null;
@@ -255,7 +262,7 @@ public class YKHttpEngine extends HttpEngine {
         if (instance == null) {
             synchronized (YKHttpEngine.class) {
                 if (instance == null) {
-                    instance = new YKHttpEngine();
+                    instance = new YKHttpEngine(YKConfig.CLIENT_ID, YKConfig.CLIENT_SECRET);
                 }
             }
         }
@@ -271,28 +278,48 @@ public class YKHttpEngine extends HttpEngine {
 
     }
 
-    /**
-     * API签名,SSO签名
-     *
-     * @param params
-     * @return
-     */
-    public String generateSignOrderByKey(HashMap<String, String> params) {
-        return generateSignOrderByKey(params, YKConfig.CLIENT_SECRET);
+    public String getToken() {
+        return token;
     }
 
-    /**
-     * @param params
-     * @param ignoreKeys 忽略签名
-     * @return
-     */
-    private String generateSignOrderByKey(HashMap<String, String> params, ArrayList<String> ignoreKeys) {
-        return generateSignOrderByKey(params, YKConfig.CLIENT_SECRET, ignoreKeys);
+    public String getRefreshToken() {
+        return refreshToken;
     }
 
+
+    public boolean isTokenAvailable() {
+        return !TextUtils.isEmpty(token);
+    }
 
     private void reSignParams(HashMap<String, String> params, ArrayList<String> ignoreKeys) {
         reSignParams(params, YKConfig.CLIENT_SECRET, ignoreKeys);
+    }
+
+    /**
+     * 重新根据参数进行签名
+     *
+     * @param params
+     * @param secret
+     */
+    protected void reSignParams(HashMap<String, String> params, String secret) {
+        reSignParams(params, secret, new ArrayList<String>());
+
+    }
+
+    /**
+     * 重新根据参数进行签名
+     *
+     * @param params
+     * @param secret
+     * @param ignoreKeys
+     */
+    protected void reSignParams(HashMap<String, String> params, String secret,
+                                ArrayList<String> ignoreKeys) {
+        params.remove("token");
+        params.remove("sign");
+        params.put("token", getToken());
+        params.put("sign", generateSign(params, secret, ignoreKeys));
+
     }
 
 
@@ -307,7 +334,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("grant_type", "refresh_token");
         params.put("refresh_token", refreshToken);
         params.put("client_id", YKConfig.CLIENT_ID);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         String returnString = new RequestHelper().setUrl(URL_OAUTH).setMethod(RequestMethod.POST).setParams(params).executeSync();
         ReturnResult returnResult = ReturnResult.create(returnString);
@@ -321,7 +348,7 @@ public class YKHttpEngine extends HttpEngine {
                     return true;
                 }
 
-                DebugFlag.logInfo(LOG_TAG, "token:" + token + "_refreshToken:" + refreshToken);
+                LogPrint.info(LOG_TAG, "token:" + token + "_refreshToken:" + refreshToken);
             }
 
         }
@@ -346,11 +373,11 @@ public class YKHttpEngine extends HttpEngine {
             params.put("password", Base64.encodeBytes(password.getBytes()));
         } else {
             params.put("username", account);
-            params.put("password", YKUtil.convert2MD532(password));
+            params.put("password", Util.convert2MD532(password));
         }
 
         params.put("client_id", YKConfig.CLIENT_ID);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         String returnString = new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).executeSync();
         ReturnResult returnResult = ReturnResult.create(returnString);
@@ -402,9 +429,9 @@ public class YKHttpEngine extends HttpEngine {
 
         HashMap<String, String> map = new HashMap<>();
         map.put("account", account);
-        map.put("n", Util.getSixRandomChars());
+        map.put("n", YKUtil.getSixRandomChars());
         map.put("t", Util.getUnixDateline() + "");
-        map.put("sign", generateSignOrderByKey(map, clientSecret));
+        map.put("sign", this.generateSign(map, clientSecret));
 
         String ticket = URLEncoder.encodeUTF8(Base64.encodeBytes(new Gson().toJson(map).getBytes()));
         String url = String.format(YKConfig.URL_ACCOUNT_AUTO_LOGIN, clientId, ticket, "", "json");
@@ -425,7 +452,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("gkkey", key);
         params.put("grant_type", "gkkey");
         params.put("client_id", YKConfig.CLIENT_ID);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         String returnString = new RequestHelper().setParams(params)
                 .setUrl(URL_API_EXCHANGE_TOKEN)
@@ -474,7 +501,7 @@ public class YKHttpEngine extends HttpEngine {
         String url = URL_API + URL_API_GET_ACCOUNT_MOUNT;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -487,7 +514,7 @@ public class YKHttpEngine extends HttpEngine {
         String url = URL_API + URL_API_GET_ACCOUNT_ENT;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -501,7 +528,7 @@ public class YKHttpEngine extends HttpEngine {
         String url = URL_API + URL_API_GET_SHORTCUTS;
         final HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -514,7 +541,7 @@ public class YKHttpEngine extends HttpEngine {
         final HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("favorite_type", type + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -528,7 +555,7 @@ public class YKHttpEngine extends HttpEngine {
         String url = URL_API + URL_API_GET_ACCOUNT_INFO;
         final HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -571,7 +598,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("fullpath", fullPath);
 //        params.put("machine", android.os.Build.BRAND);
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -599,7 +626,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("fullpaths", fullPathsString);
         params.put("mount_id", mountId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -621,7 +648,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("mount_id", String.valueOf(mountId));
         params.put("fullpath", fullPath);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET).setUrl(url)
                 .setCheckAuth(true)
@@ -651,7 +678,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("order", order + "");
         params.put("keyword", key);
         params.put("show_child", showChild + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
 
     }
@@ -670,7 +697,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("ent_id", String.valueOf(entId));
         params.put("group_id", String.valueOf(groupId));
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setUrl(url)
                 .setMethod(RequestMethod.GET)
@@ -695,7 +722,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("ent_id", String.valueOf(entId));
         params.put("_member_id", String.valueOf(memberId));
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -724,7 +751,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("start", start + "");
         params.put("size", Constants.MEMBERS_LIMIT_SIZE + "");
         params.put("keyword", keyWord + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -745,7 +772,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("start", start + "");
         params.put("_member_ids", memberIdsStr + "");
         params.put("size", Constants.MEMBERS_LIMIT_SIZE + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -765,7 +792,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("start", start + "");
         params.put("size", Constants.MEMBERS_LIMIT_SIZE + "");
         params.put("keyword", keyWord);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -783,7 +810,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("ent_id", String.valueOf(entId));
         params.put("keyword", keyWord);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -807,7 +834,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("start", String.valueOf(start));
         params.put("size", size + "");
         params.put("keyword", keyWord + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -842,7 +869,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("keyword", keyWord + "");
         params.put("with_info", (withInfo ? 1 : 0) + "");
         params.put("with_group", (withGroup ? 1 : 0) + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -862,7 +889,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("ent_id", String.valueOf(entId));
         params.put("size", Constants.MEMBERS_LIMIT_SIZE + "");
         params.put("start", start + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -881,7 +908,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("start", String.valueOf(start));
         params.put("ent_id", String.valueOf(entId));
         params.put("size", Constants.GROUPS_LIMIT_SIZE + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -902,7 +929,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("size", Constants.MEMBERS_LIMIT_SIZE + "");
         params.put("with_info", (withInfo ? 1 : 0) + "");
         params.put("with_group", (withGroup ? 1 : 0) + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
 
     }
@@ -926,7 +953,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("org_id", String.valueOf(orgId));
         params.put("with_info", (withInfo ? 1 : 0) + "");
         params.put("with_group", (withGroup ? 1 : 0) + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -952,7 +979,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("org_id", String.valueOf(orgId));
         params.put("with_info", (withInfo ? 1 : 0) + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -969,7 +996,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("org_id", String.valueOf(orgId));
         params.put("with_info", (withInfo ? 1 : 0) + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -994,7 +1021,7 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("org_id", String.valueOf(orgId));
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
@@ -1021,7 +1048,7 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("org_id", String.valueOf(orgId));
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1043,7 +1070,7 @@ public class YKHttpEngine extends HttpEngine {
         String url = URL_API + URL_API_GET_DEFAULT_LIB_LOGOS;
         final HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -1062,7 +1089,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("fullpath", fullpath);
         params.put("permission", permission);
         params.put("is_group", (isGroup ? 1 : 0) + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1087,7 +1114,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("fullpath", fullpath);
         params.put("size", size + "");
         params.put("start", start + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
@@ -1112,7 +1139,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("fullpath", fullpath);
         params.put("size", size + "");
         params.put("start", start + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -1130,7 +1157,7 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("ent_id", endId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -1160,7 +1187,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("logo", logo);
         params.put("storage_point", storagePoint);
         params.put("capacity", capacity + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -1183,7 +1210,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("org_id", orgId + "");
         params.put("group_id", groupId + "");
         params.put("role_id", roleId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1209,7 +1236,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("org_id", orgId + "");
         params.put("group_id", groupId + "");
         params.put("role_id", roleId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1231,7 +1258,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("ent_id", entId + "");
         params.put("org_id", orgId + "");
         params.put("group_id", groupId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1253,7 +1280,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("org_id", orgId + "");
         params.put("_member_ids", memberids);
         params.put("role_id", roleId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1272,7 +1299,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("org_id", orgId + "");
         params.put("_member_ids", memberids);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1298,7 +1325,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("org_id", orgId + "");
         params.put("_member_ids", memberids);
         params.put("role_id", roleId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1325,7 +1352,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("org_id", orgId + "");
         params.put("_member_ids", memberids);
         params.put("state", state + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1351,7 +1378,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("mount_id", mountid + "");
         params.put("fullpath", fullpath);
         params.put("favorite_type", type + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1371,7 +1398,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("mount_id", mountid + "");
         params.put("fullpath", fullpath);
         params.put("favorite_type", type + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1388,7 +1415,7 @@ public class YKHttpEngine extends HttpEngine {
         String url = URL_API + URL_API_CLEAR_FAVORITE;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1407,7 +1434,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("favorite_type", type + "");
         params.put("favorite_name", name);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1423,7 +1450,7 @@ public class YKHttpEngine extends HttpEngine {
         String url = URL_API + URL_API_GET_FAVORITE_NAMES;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -1468,7 +1495,7 @@ public class YKHttpEngine extends HttpEngine {
         } else {
             params.put("org_id", orgId + "");
         }
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -1484,7 +1511,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("org_id", orgId + "");
         params.put("logo", logoUrl);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
@@ -1509,7 +1536,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("org_id", orgId + "");
         params.put("name", name);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -1532,7 +1559,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("org_id", orgId + "");
         params.put("description", desc);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
@@ -1557,7 +1584,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("org_id", orgId + "");
         params.put("capacity", capacity + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -1586,7 +1613,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("enable_publish_notice", enablePublishNotice + "");
         params.put("enable_create_org", enableCreateOrg + "");
         params.put("member_phone", memberPhone);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1615,7 +1642,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("ent_id", entId + "");
         params.put("_member_ids", memberIds);
         params.put("state", state + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
@@ -1645,7 +1672,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("ent_id", entId + "");
         params.put("group_id", groupId + "");
         params.put("_member_ids", memberIds);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
@@ -1675,7 +1702,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("ent_id", entId + "");
         params.put("group_id", groupId + "");
         params.put("_member_ids", memberIds);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
@@ -1701,7 +1728,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("ent_id", entId + "");
         params.put("group_id", groupId + "");
         params.put("name", name);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1723,7 +1750,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("ent_id", entId + "");
         params.put("group_id", groupId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1747,7 +1774,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("ent_id", entId + "");
         params.put("group_id", groupId + "");
         params.put("name", name);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1777,7 +1804,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("member_password", password);
         params.put("enable_publish_notice", publishNotice + "");
         params.put("enable_create_org", createOrg + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1806,7 +1833,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("ent_id", entId + "");
         params.put("member_email", memberEmail);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET)
                 .setUrl(url).setCheckAuth(true)
@@ -1831,7 +1858,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("ent_id", entId + "");
         params.put("_member_ids", removeMemberIds);
         params.put("_to_member_id", transferMemberId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1856,7 +1883,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("value", value + "");
         params.put("type", type + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1881,7 +1908,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("value", value + "");
         params.put("type", type + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST)
                 .setUrl(url).setCheckAuth(true)
@@ -1906,7 +1933,7 @@ public class YKHttpEngine extends HttpEngine {
             params.put("storage_point", storagePoint);
         }
         params.put("type", type);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).setCheckAuth(true).executeSync();
     }
 
@@ -1920,7 +1947,7 @@ public class YKHttpEngine extends HttpEngine {
         String url = URL_API + URL_API_GET_SETTING;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -1932,7 +1959,7 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("member_name", name);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.POST)
                 .setUrl(url)
@@ -1958,7 +1985,7 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("mobile", mobile);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.POST)
                 .setUrl(url)
@@ -1986,7 +2013,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("device", device);
         params.put("info", info);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.POST)
                 .setUrl(url)
@@ -2014,7 +2041,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("device_id", deviceId + "");
         params.put("state", state + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.POST)
                 .setUrl(url)
@@ -2040,7 +2067,7 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("device_id", deviceId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.POST)
                 .setUrl(url)
@@ -2066,7 +2093,7 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("state", state + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.POST)
                 .setUrl(url)
@@ -2095,7 +2122,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("email", email);
         params.put("password", password);
         params.put("client_id", YKConfig.CLIENT_ID);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.POST)
@@ -2122,7 +2149,7 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("email", email);
         params.put("client_id", YKConfig.CLIENT_ID);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.POST)
@@ -2151,7 +2178,7 @@ public class YKHttpEngine extends HttpEngine {
         parameters.put("fullpath", fullPath);
         parameters.put("token", getToken());
         parameters.put("size", FILE_SIZE_NONE + "");
-        parameters.put("sign", generateSignOrderByKey(parameters));
+        parameters.put("sign", generateSign(parameters));
         return new RequestHelper().setParams(parameters).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -2172,7 +2199,7 @@ public class YKHttpEngine extends HttpEngine {
         parameters.put("token", getToken());
         parameters.put("size", size + "");
         parameters.put("start", start + "");
-        parameters.put("sign", generateSignOrderByKey(parameters));
+        parameters.put("sign", generateSign(parameters));
         return new RequestHelper().setParams(parameters).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -2192,7 +2219,7 @@ public class YKHttpEngine extends HttpEngine {
         parameters.put("size", size + "");
         parameters.put("start", start + "");
         parameters.put("hashs", new Gson().toJson(hashs));
-        parameters.put("sign", generateSignOrderByKey(parameters));
+        parameters.put("sign", generateSign(parameters));
         return new RequestHelper().setParams(parameters).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
 
     }
@@ -2224,7 +2251,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("target_mount_id", String.valueOf(targetMountId));
         params.put("target_fullpath", targetFullPath);
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.POST)
@@ -2258,7 +2285,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("target_mount_id", String.valueOf(targetMountId));
         params.put("target_fullpath", targetFullPath);
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.POST)
@@ -2280,7 +2307,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("keyword", keyword);
         params.put("mount_id", String.valueOf(mountId));
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.GET)
                 .setUrl(url)
@@ -2331,7 +2358,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("mount_id", mountId + "");
         params.put("lock", (lock == 0 ? "unlock" : "lock"));
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).setCheckAuth(true).executeSync();
     }
 
@@ -2373,7 +2400,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("hash", hash);
         params.put("mount_id", mountId + "");
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST).setUrl(url)
                 .setCheckAuth(true)
@@ -2395,7 +2422,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("fullpath", fullPath);
         params.put("mount_id", mountId + "");
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST).setUrl(url)
                 .setCheckAuth(true)
@@ -2419,7 +2446,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("mount_id", mountId + "");
         params.put("hid", hid);
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST).setUrl(url)
@@ -2447,7 +2474,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("domain", domain);
         params.put("auth", auth);
         params.put("client_id", YKConfig.CLIENT_ID);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         String returnString = new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).executeSync();
         ReturnResult returnResult = ReturnResult.create(returnString);
@@ -2482,7 +2509,7 @@ public class YKHttpEngine extends HttpEngine {
             params.put("n", n + "");
             params.put("t", t + "");
             params.put("token", token);
-            ossUrl = String.format(YKConfig.URL_OSS_WEBSITE, URLEncoder.encodeUTF8(url), token, t + "", n, generateSignOrderByKey(params));
+            ossUrl = String.format(YKConfig.URL_OSS_WEBSITE, URLEncoder.encodeUTF8(url), token, t + "", n, generateSign(params));
         }
         return ossUrl;
     }
@@ -2515,7 +2542,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("scope", scope);
         params.put("day", day);
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST).setUrl(url)
@@ -2539,7 +2566,7 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("size", size + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET).setUrl(url)
                 .setCheckAuth(true)
@@ -2567,7 +2594,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("mount_id", mountId + "");
         params.put("fullpath", fullPath);
         params.put("message", EmojiMapUtil.replaceUnicodeEmojis(message));
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST).setUrl(url)
                 .setCheckAuth(true)
@@ -2594,7 +2621,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("fullpath", fullPath);
         params.put("start", start + "");
         params.put("size", size + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.GET).setUrl(url)
@@ -2640,7 +2667,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("ent_id", entId + "");
         params.put("_member_id", memberId + "");
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -2666,7 +2693,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("filename", fileName);
         params.put("url", downloadUrl);
         params.put("token", TextUtils.isEmpty(token) ? getToken() : token);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST).setUrl(url)
@@ -2693,7 +2720,7 @@ public class YKHttpEngine extends HttpEngine {
 //        params.put("dateline", dateline + "");
 //        params.put("size", size + "");
 //        params.put("token", getToken());
-//        params.put("sign", generateSignOrderByKey(params));
+//        params.put("sign", generateSign(params));
 //        String returnString  = sendRequestWithAuth(url, "GET", params, null);
 //        return DataDifferentialListData.create(b);
 //
@@ -2714,8 +2741,8 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("ent_id", entId + "");
-        params.put("_out_ids", YKUtil.intArrayToString(outIds, ","));
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("_out_ids", Util.intArrayToString(outIds, ","));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params)
                 .setMethod(RequestMethod.POST).setUrl(url)
                 .setCheckAuth(true)
@@ -2738,8 +2765,8 @@ public class YKHttpEngine extends HttpEngine {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", TextUtils.isEmpty(token) ? getToken() : token);
         params.put("ent_id", entId + "");
-        params.put("_member_ids", YKUtil.intArrayToString(memberIds, ","));
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("_member_ids", Util.intArrayToString(memberIds, ","));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -2781,7 +2808,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("mount_id", String.valueOf(mountId));
         params.put("fullpath", fullPath);
         params.put("hid", hid);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -2800,7 +2827,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("mount_id", String.valueOf(mountId));
         params.put("filehash", filehash);
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
@@ -2823,7 +2850,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("filehash", fileHash);
         params.put("net", net);
         params.put("open", (isOpen ? 1 : 0) + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         return new RequestHelper().setParams(params).
                 setMethod(RequestMethod.GET)
                 .setUrl(url)
@@ -2848,7 +2875,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("fullpath", String.valueOf(fullPath));
         params.put("hid", String.valueOf(hid));
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         String url = URL_API + URL_API_GET_FILE_INFO;
 
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
@@ -2870,7 +2897,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("fullpath", fullPath);
         params.put("hash", hash);
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
         String url = URL_API + URL_API_GET_FILE_ATTRIBUTE;
 
@@ -2892,7 +2919,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("mount_id", String.valueOf(mountId));
         params.put("hash", hash);
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
 
 
         String url = URL_API + URL_API_GET_FILE_INFO;
@@ -2922,7 +2949,7 @@ public class YKHttpEngine extends HttpEngine {
         ignoreKeys.add("filehash");
         ignoreKeys.add("filesize");
 
-        params.put("sign", generateSignOrderByKey(params, ignoreKeys));
+        params.put("sign", generateSign(params, ignoreKeys));
 
         String url = URL_API + URL_API_CREATE_FILE;
 
@@ -2947,7 +2974,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("mount_id", String.valueOf(mountId));
         params.put("fullpath", fullpath);
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         String url = URL_API + URL_API_CREATE_FOLDER;
         return new RequestHelper().setParams(params)
                 .setUrl(url)
@@ -2984,7 +3011,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("dateline", String.valueOf(msdateline));
         params.put("size", String.valueOf(size));
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         String url = URL_API + URL_API_FILE_UPDATE;
 
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
@@ -3004,7 +3031,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("fullpath", fullPath);
         params.put("keywords", keywords);
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         String url = URL_API + URL_API_FILE_KEYWORD;
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).setCheckAuth(true).executeSync();
     }
@@ -3015,7 +3042,7 @@ public class YKHttpEngine extends HttpEngine {
     public String getFileRecentModified() {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         String url = URL_API + URL_API_FILE_RECENT_MODIFIED;
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
@@ -3028,7 +3055,7 @@ public class YKHttpEngine extends HttpEngine {
     public String getFileLocked() {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         String url = URL_API + URL_API_FILE_LOCKED;
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
 
@@ -3044,7 +3071,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("fullpath", fullPath + "");
         params.put("mount_id", mountId + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         String url = URL_API + URL_API_FILE_UPLOAD_SERVER;
         String returnString = new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET)
                 .setCheckAuth(true).executeSync();
@@ -3073,11 +3100,11 @@ public class YKHttpEngine extends HttpEngine {
      */
     public String uploadFile(int mountId, String fullPath, String opName, String localPath, boolean overWrite) {
         String server = getUploadSever(mountId, fullPath);
-        DebugFlag.logInfo(LOG_TAG, "upload server:" + server);
+        LogPrint.info(LOG_TAG, "upload server:" + server);
 
         String url = server + URL_API_FILE_UPLOAD;
 
-        DebugFlag.logInfo(LOG_TAG, "upload url:" + url);
+        LogPrint.info(LOG_TAG, "upload url:" + url);
 
 
         FileInputStream stream;
@@ -3106,7 +3133,7 @@ public class YKHttpEngine extends HttpEngine {
             multipart.addFormField("op_name", opName);
             multipart.addFormField("overwrite", (overWrite ? 1 : 0) + "");
             multipart.addFormField("filefield", "file");
-            multipart.addFormField("sign", generateSignOrderByKey(params));
+            multipart.addFormField("sign", generateSign(params));
 
             multipart.addFilePart("file", stream, fileName);
 
@@ -3157,7 +3184,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("filesize", fileSize + "");
         params.put("target_mount_id", targetMountId + "");
         params.put("target_fullpath", targetFullPath + "");
-        params.put("sign", generateSignOrderByKey(params));
+        params.put("sign", generateSign(params));
         String url = URL_API + URL_API_FILE_SAVE;
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).setCheckAuth(true).executeSync();
     }
@@ -3238,7 +3265,7 @@ public class YKHttpEngine extends HttpEngine {
         String executeSync() {
             checkNecessaryParams(url, method);
 
-            if (!YKUtil.isNetworkAvailableEx()) {
+            if (!Util.isNetworkAvailableEx()) {
                 return "";
             }
 
@@ -3258,7 +3285,7 @@ public class YKHttpEngine extends HttpEngine {
             checkNecessaryParams(url, method);
 
             if (listener != null) {
-                if (!YKUtil.isNetworkAvailableEx()) {
+                if (!Util.isNetworkAvailableEx()) {
                     listener.onReceivedData(apiId, null, ERRORID_NETDISCONNECT);
                     return null;
                 }
@@ -3299,7 +3326,7 @@ public class YKHttpEngine extends HttpEngine {
 
         Thread executeAsyncTask(Thread task, final DataListener listener, final int apiId) {
             if (listener != null) {
-                if (!YKUtil.isNetworkAvailableEx()) {
+                if (!Util.isNetworkAvailableEx()) {
                     listener.onReceivedData(apiId, null, ERRORID_NETDISCONNECT);
                     return null;
                 }

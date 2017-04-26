@@ -1,6 +1,7 @@
 package com.gokuai.cloud;
 
-import com.gokuai.library.util.DebugFlag;
+import com.gokuai.base.DebugConfig;
+import com.gokuai.base.NetConnection;
 import org.apache.http.util.TextUtils;
 
 import java.net.Proxy;
@@ -134,14 +135,12 @@ public class ConfigHelper {
 
         YKConfig.URL_ACCOUNT_AUTO_LOGIN = url + "/account/autologin/entgrant?client_id=%s&ticket=%s&returnurl=%s&format=%s";
 
-        DebugFlag.LOG_VISIBLE = mLogVisible;
+        DebugConfig.PRINT_LOG = mLogVisible;
         YKConfig.ENT_DOMAIN = mEntDomain;
 
         //TODO 设置代理
-        if (mProxy == null){
-            YKConfig.PROXY = null;
-        }else {
-            YKConfig.PROXY = mProxy;
+        if (!(mProxy == null)){
+            NetConnection.proxy = mProxy;
         }
     }
 }

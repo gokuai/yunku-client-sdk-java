@@ -1,11 +1,11 @@
 package com.gokuai.demo;
 
+import com.gokuai.base.LogPrint;
 import com.gokuai.cloud.ConfigHelper;
 import com.gokuai.cloud.transinterface.YKHttpEngine;
 import com.gokuai.demo.helper.ClientConfig;
 import com.gokuai.demo.helper.DeserializeHelper;
 import com.gokuai.demo.helper.YunkuAuthHelper;
-import com.gokuai.library.util.DebugFlag;
 
 /**
  * Created by Brandon on 2016/10/12.
@@ -40,7 +40,7 @@ public class YunkuAccount {
      */
     static void getMountList() {
 
-        DebugFlag.logInfo(TAG, "======getMountList\n");
+        LogPrint.info(TAG, "======getMountList\n");
 
         String returnString = YKHttpEngine.getInstance().getMountsInfo();
 
@@ -52,7 +52,7 @@ public class YunkuAccount {
      * 获取企业列表
      */
     static void getEntList() {
-        DebugFlag.logInfo(TAG, "======getEntList\n");
+        LogPrint.info(TAG, "======getEntList\n");
 
         String returnString = YKHttpEngine.getInstance().getEntInfo();
 
@@ -63,7 +63,7 @@ public class YunkuAccount {
      * 获取帐号信息
      */
     static void getAccountInfo() {
-        DebugFlag.logInfo(TAG, "======getAccountInfo\n");
+        LogPrint.info(TAG, "======getAccountInfo\n");
 
         String returnString = YKHttpEngine.getInstance().getAccountInfo();
 
