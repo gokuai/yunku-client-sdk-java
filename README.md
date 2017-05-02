@@ -11,7 +11,7 @@
 
 ```groovy
 	dependencies {
-	        compile 'com.github.gokuai.yunku-client-sdk-java:YunkuAPILibrary:3.0'
+	        compile 'com.github.gokuai.yunku-client-sdk-java:YunkuAPILibrary:3.1'
 	}
 ```
 或者Maven：
@@ -29,6 +29,6 @@
 	<dependency>
 	    <groupId>com.github.gokuai.yunku-client-sdk-java</groupId>
 	    <artifactId>YunkuAPILibrary</artifactId>
-	    <version>3.0</version>
+	    <version>3.1</version>
 	</dependency>
 ```
