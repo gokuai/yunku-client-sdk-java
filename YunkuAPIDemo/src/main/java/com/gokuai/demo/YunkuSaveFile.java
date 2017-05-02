@@ -37,7 +37,6 @@ public class YunkuSaveFile {
         //先授权登录
         loginBySso("[user account]", "[CLIENT_ID]", "[CLIENT_SECRET]");
 
-        YKHttpEngine.getInstance().loginSync("[account]", "[password]");
         //从库列表中获取到 mountId
         int mountId = selectMountFromList();
 
