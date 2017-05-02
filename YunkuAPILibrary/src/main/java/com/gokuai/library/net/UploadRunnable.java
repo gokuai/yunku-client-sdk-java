@@ -1,6 +1,8 @@
 package com.gokuai.library.net;
 
+import com.gokuai.cloud.data.FileInfo;
 import com.gokuai.cloud.transinterface.YKHttpEngine;
+import com.gokuai.cloud.transinterface.YKUtil;
 import com.gokuai.library.data.FileOperationData;
 import com.gokuai.library.data.ReturnResult;
 import com.gokuai.library.util.DebugFlag;
@@ -8,6 +10,7 @@ import com.gokuai.library.util.URLEncoder;
 import com.gokuai.library.util.Util;
 import okhttp3.*;
 import org.apache.http.HttpStatus;
+import org.apache.http.util.TextUtils;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -38,11 +41,23 @@ public class UploadRunnable implements Runnable {
 
     private UploadCallBack mCallBack;
     private long mRId;
+    private InputStream mInputStream;
 
     public UploadRunnable(String localFullPath, int mountId, String fullPath,
                              long dateline, UploadCallBack callBack) {
 
         this.mLocalFullPath = localFullPath;
+        this.mFullPath = fullPath;
+        this.mMountId = mountId;
+        this.mDateline = dateline;
+        this.mCallBack = callBack;
+        this.mRId = nextThreadID();
+    }
+
+    public UploadRunnable(InputStream inputStream, int mountId, String fullPath,
+                          long dateline, UploadCallBack callBack) {
+
+        this.mInputStream = inputStream;
         this.mFullPath = fullPath;
         this.mMountId = mountId;
         this.mDateline = dateline;
@@ -62,15 +77,28 @@ public class UploadRunnable implements Runnable {
         InputStream in = null;
         BufferedInputStream bis = null;
         try {
-            File file = new File(mLocalFullPath);
-            if (!file.exists()) {
-                DebugFlag.logInfo(LOG_TAG, "'" + mLocalFullPath + "'  file not exist!");
-                return;
+
+            String filehash = "";
+            long filesize = 0;
+            if (!TextUtils.isEmpty(mLocalFullPath)) {
+                File file = new File(mLocalFullPath);
+                if (!file.exists()) {
+                    DebugFlag.logInfo(LOG_TAG, "'" + mLocalFullPath + "'  file not exist!");
+                    return;
+                }
+
+            filehash = Util.getFileSha1(mLocalFullPath);
+            filesize = file.length();
             }
             String filename = Util.getNameFromPath(fullpath).replace("/", "");
 
-            String filehash = Util.getFileSha1(mLocalFullPath);
-            long filesize = file.length();
+            if (mInputStream != null) {
+                mInputStream = Util.cloneInputStream(mInputStream);
+                FileInfo fileInfo = YKUtil.getFileSha1(mInputStream, false);
+                filehash = fileInfo.fileHash;
+                filesize = fileInfo.fileSize;
+            }
+
             ReturnResult returnResult = ReturnResult.create(YKHttpEngine.getInstance()
                     .addFile(mMountId, fullpath, filehash, filesize));
 
@@ -85,9 +113,17 @@ public class UploadRunnable implements Runnable {
                         // upload_init
                         upload_init(data.getHash(), filename, fullpath, filehash, filesize);
 
-
                         // upload_part
-                        in = new FileInputStream(mLocalFullPath);
+                        if (mInputStream != null) {
+                            in = mInputStream;
+                        } else {
+                            in = new FileInputStream(mLocalFullPath);
+                        }
+
+                        if (in == null) {
+                            throw new Exception(" error file InputStream ");
+                        }
+
                         bis = new BufferedInputStream(in);
 
                         int code = 0;

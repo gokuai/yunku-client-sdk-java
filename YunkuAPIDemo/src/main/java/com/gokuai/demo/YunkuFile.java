@@ -10,6 +10,10 @@ import com.gokuai.library.net.UploadCallBack;
 import com.gokuai.library.util.DebugFlag;
 import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -59,6 +63,8 @@ public class YunkuFile {
 //        fileUploadMSMulti();
 
 //        fileUploadByBlock();
+
+//        fileUploadByStream();
 
 //        fileDelete();
 
@@ -254,8 +260,42 @@ public class YunkuFile {
      */
     static void fileUploadByBlock() {
 
-        YKHttpEngine.getInstance().uploadByBlock(251025, "saveto2.png",
-                "/Users/Brandon/Desktop/saveto2.png", new UploadCallBack() {
+        YKHttpEngine.getInstance().uploadByBlock(1221861, "saveto2.png",
+                "YunkuAPIDemo/testData/test.jpg", new UploadCallBack() {
+                    @Override
+                    public void onSuccess(long threadId, String fileHash) {
+                        System.out.println("onSuccess threadId：" + threadId + ",fileHash：" + fileHash);
+                    }
+
+                    @Override
+                    public void onFail(long threadId, String errorMsg) {
+                        System.out.println("onFail threadId：" + threadId + ",errorMsg：" + errorMsg);
+
+                    }
+
+                    @Override
+                    public void onProgress(long threadId, float percent) {
+                        System.out.println("onProgress threadId：" + threadId + ",percent：" + percent);
+
+                    }
+                });
+
+    }
+
+    /**
+     * 流文件上传 （分块上传）
+     */
+    static void fileUploadByStream(){
+
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(new File("YunkuAPIDemo/testData/test.jpg"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        YKHttpEngine.getInstance().uploadByBlock(1221861, "test5.jpg",
+                inputStream, new UploadCallBack() {
                     @Override
                     public void onSuccess(long threadId, String fileHash) {
                         System.out.println("onSuccess threadId：" + threadId + ",fileHash：" + fileHash);

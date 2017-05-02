@@ -88,6 +88,30 @@ public class Util {
     }
 
     /**
+     * 克隆 InputStream
+     *
+     * @param inputStream
+     * @return
+     */
+    public static InputStream cloneInputStream(final InputStream inputStream) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+        int len;
+        try {
+            while ((len = inputStream.read(buffer)) > -1) {
+                baos.write(buffer, 0, len);
+            }
+            baos.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new ByteArrayInputStream(baos.toByteArray());
+    }
+
+    /**
      * 获取文件的filehash
      */
     public static String getFileSha1(InputStream in) {
@@ -124,7 +148,7 @@ public class Util {
         return filehash;
     }
 
-    private static String toHexString(byte b[]) {
+    protected static String toHexString(byte b[]) {
         StringBuilder sb = new StringBuilder(b.length * 2);
         for (int i = 0; i < b.length; i++) {
             sb.append(hexChar[(b[i] & 0xf0) >>> 4]);

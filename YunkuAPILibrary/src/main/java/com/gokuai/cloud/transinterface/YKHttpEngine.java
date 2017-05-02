@@ -15,10 +15,7 @@ import com.google.gson.Gson;
 import org.apache.http.util.TextUtils;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -3132,6 +3129,22 @@ public class YKHttpEngine extends HttpEngine {
     public UploadRunnable uploadByBlock(int mountId, String fullPath, String localFilePath,
                                         UploadCallBack callBack) {
         UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), callBack);
+        Thread thread = new Thread(uploadRunnable);
+        thread.start();
+        return uploadRunnable;
+    }
+
+    /**
+     * 通过文件流分块上传
+     *
+     * @param fullPath
+     * @param localFilePath
+     * @param callBack
+     * @return
+     */
+    public UploadRunnable uploadByBlock(int mountId, String fullPath, InputStream localFilePath,
+                                        UploadCallBack callBack) {
+        UploadRunnable uploadRunnable = new UploadRunnable(localFilePath ,mountId, fullPath, Util.getUnixDateline(), callBack);
         Thread thread = new Thread(uploadRunnable);
         thread.start();
         return uploadRunnable;
