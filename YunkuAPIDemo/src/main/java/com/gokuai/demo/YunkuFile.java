@@ -260,8 +260,8 @@ public class YunkuFile {
      */
     static void fileUploadByBlock() {
 
-        YKHttpEngine.getInstance().uploadByBlock(1221861, "saveto2.png",
-                "YunkuAPIDemo/testData/test.jpg", new UploadCallBack() {
+        YKHttpEngine.getInstance().uploadByBlock(1221861, "fileUploadByBlock.png",
+                "YunkuAPILibrary/testData/test.jpg", new UploadCallBack() {
                     @Override
                     public void onSuccess(long threadId, String fileHash) {
                         System.out.println("onSuccess threadId：" + threadId + ",fileHash：" + fileHash);
@@ -289,12 +289,12 @@ public class YunkuFile {
 
         InputStream inputStream = null;
         try {
-            inputStream = new FileInputStream(new File("YunkuAPIDemo/testData/test.jpg"));
+            inputStream = new FileInputStream(new File("YunkuAPILibrary/testData/test.jpg"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-        YKHttpEngine.getInstance().uploadByBlock(1221861, "test5.jpg",
+        YKHttpEngine.getInstance().uploadByBlock(1221861, "fileUploadByStream.jpg",
                 inputStream, new UploadCallBack() {
                     @Override
                     public void onSuccess(long threadId, String fileHash) {

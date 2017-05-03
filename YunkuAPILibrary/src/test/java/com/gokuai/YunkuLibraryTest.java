@@ -92,7 +92,7 @@ public class YunkuLibraryTest {
     @Ignore("updateLibraryGroup is ignored")
     @Test
     public void updateLibraryGroup() throws Exception {
-        String s = YKHttpEngine.getInstance().updateLibraryGroup(0, 0, 0, 0);
+        String s = YKHttpEngine.getInstance().updateLibraryGroup(705, 371523, 78724, 7880);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
@@ -100,7 +100,7 @@ public class YunkuLibraryTest {
     @Ignore("updateLibraryGroup is ignored")
     @Test
     public void delLibraryGroup() throws Exception {
-        String s = YKHttpEngine.getInstance().delLibraryGroup(0, 0, 0);
+        String s = YKHttpEngine.getInstance().delLibraryGroup(705, 371523, 78724);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
@@ -108,7 +108,7 @@ public class YunkuLibraryTest {
     @Ignore("updateLibraryGroup is ignored")
     @Test
     public void addLibraryMember() throws Exception {
-        String s = YKHttpEngine.getInstance().addLibraryMember(4448, "216144", 3208);
+        String s = YKHttpEngine.getInstance().addLibraryMember(371523, "2608", 3208);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
