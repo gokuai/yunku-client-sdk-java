@@ -260,8 +260,8 @@ public class YunkuFile {
      */
     static void fileUploadByBlock() {
 
-        YKHttpEngine.getInstance().uploadByBlock(1221861, "fileUploadByBlock.png",
-                "YunkuAPILibrary/testData/test.jpg", new UploadCallBack() {
+        YKHttpEngine.getInstance().uploadByBlock(1221861, "ps.txt",
+                "YunkuAPILibrary/testData/ps.txt", new UploadCallBack() {
                     @Override
                     public void onSuccess(long threadId, String fileHash) {
                         System.out.println("onSuccess threadId：" + threadId + ",fileHash：" + fileHash);
