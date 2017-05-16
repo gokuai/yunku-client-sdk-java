@@ -328,7 +328,7 @@ public class YunkuFileTest {
         Assert.assertEquals(true,new File(TEST_FILE_PATH).exists());
         YKHttpEngine.getInstance().uploadByBlock(1221861, "v3.png", TEST_FILE_PATH, new UploadCallBack() {
             @Override
-            public void onSuccess(long threadId, String fileHash) {
+            public void onSuccess(long threadId, String result) {
                 latch.countDown();
                 Assert.assertEquals(1,threadId);
                 System.out.println("success:" + threadId);

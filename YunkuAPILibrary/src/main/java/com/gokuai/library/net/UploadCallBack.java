@@ -4,7 +4,7 @@ package com.gokuai.library.net;
  * Created by Brandon on 14/12/16.
  */
 public interface UploadCallBack {
-    void onSuccess(long threadId,String fileHash);
+    void onSuccess(long threadId,String result);
 
     void onFail(long threadId, String errorMsg);
 
