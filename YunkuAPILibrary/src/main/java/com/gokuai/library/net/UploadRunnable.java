@@ -44,9 +44,10 @@ public class UploadRunnable implements Runnable {
     private UploadCallBack mCallBack;
     private long mRId;
     private InputStream mInputStream;
+    private YKHttpEngine mYkHttpEngine;
 
     public UploadRunnable(String localFullPath, int mountId, String fullPath,
-                          long dateline, UploadCallBack callBack) {
+                          long dateline, YKHttpEngine ykHttpEngine, UploadCallBack callBack) {
 
         this.mLocalFullPath = localFullPath;
         this.mFullPath = fullPath;
@@ -54,10 +55,11 @@ public class UploadRunnable implements Runnable {
         this.mDateline = dateline;
         this.mCallBack = callBack;
         this.mRId = nextThreadID();
+        this.mYkHttpEngine = ykHttpEngine;
     }
 
     public UploadRunnable(InputStream inputStream, int mountId, String fullPath,
-                          long dateline, UploadCallBack callBack) {
+                          long dateline, YKHttpEngine ykHttpEngine, UploadCallBack callBack) {
 
         this.mInputStream = inputStream;
         this.mFullPath = fullPath;
@@ -65,6 +67,7 @@ public class UploadRunnable implements Runnable {
         this.mDateline = dateline;
         this.mCallBack = callBack;
         this.mRId = nextThreadID();
+        this.mYkHttpEngine = ykHttpEngine;
     }
 
     private static synchronized long nextThreadID() {
@@ -101,8 +104,7 @@ public class UploadRunnable implements Runnable {
                 filesize = fileInfo.fileSize;
             }
 
-            ReturnResult returnResult = ReturnResult.create(YKHttpEngine.getInstance()
-                    .addFile(mMountId, fullpath, filehash, filesize));
+            ReturnResult returnResult = ReturnResult.create(mYkHttpEngine.addFile(mMountId, fullpath, filehash, filesize));
 
             FileOperationData data = FileOperationData.create(returnResult.getResult(), returnResult.getStatusCode());
 
