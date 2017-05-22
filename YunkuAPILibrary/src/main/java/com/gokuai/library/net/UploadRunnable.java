@@ -282,7 +282,7 @@ public class UploadRunnable implements Runnable {
      * @param fullPath
      */
     private void upload_server(long filesize, String filehash, String fullPath) {
-        ReturnResult returnResult = ReturnResult.create(YKHttpEngine.getInstance().addFile(mMountId, fullPath, filehash, filesize));
+        ReturnResult returnResult = ReturnResult.create(mYkHttpEngine.addFile(mMountId, fullPath, filehash, filesize));
         FileOperationData data = FileOperationData.create(returnResult.getResult(), returnResult.getStatusCode());
         if (data != null) {
             mServer = data.getServer();
@@ -307,7 +307,7 @@ public class UploadRunnable implements Runnable {
         headParams.put("x-gk-upload-filehash", filehash);
         headParams.put("x-gk-upload-filesize", String.valueOf(filesize));
         headParams.put("x-gk-upload-mountid", String.valueOf(mMountId));
-        headParams.put("x-gk-token", YKHttpEngine.getInstance().getToken());
+        headParams.put("x-gk-token", mYkHttpEngine.getToken());
         String returnString = NetConnection.sendRequest(url, RequestMethod.POST, null, headParams);
         ReturnResult returnResult = ReturnResult.create(returnString);
         if (returnResult.getStatusCode() == HttpURLConnection.HTTP_OK) {
