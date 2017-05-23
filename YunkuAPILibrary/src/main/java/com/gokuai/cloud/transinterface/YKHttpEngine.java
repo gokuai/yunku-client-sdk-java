@@ -287,7 +287,7 @@ public class YKHttpEngine extends HttpEngine {
     }
 
     private void reSignParams(HashMap<String, String> params, ArrayList<String> ignoreKeys) {
-        reSignParams(params, YKConfig.CLIENT_SECRET, ignoreKeys);
+        reSignParams(params, mClientSecret, ignoreKeys);
     }
 
     /**
