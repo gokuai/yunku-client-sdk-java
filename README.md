@@ -94,6 +94,86 @@ Robots: noindex,nofollow
 
 ---
 
+### 异步登录方式
+	loginAsync(final String account, final String password, final DataListener listener)
+	
+#### 参数
+
+| 参数 | 必须 | 类型 | 说明 |
+| --- | --- | --- | --- |
+| account | 是 | string | 账号 |
+| password | 是 | string | 密码 |
+| listener | 是 | DataListener | 从服务器获得数据后的回调 |
+
+#### 返回结果
+
+    {
+        "expires_in":Access Token的有效期，以秒为单位,
+        "access_token":用于调用access_token，接口获取授权后的access token,
+        "refresh_token":用于刷新access_token 的 refresh_token，有效期7天,
+        "device_count":设备唯一号,
+        "dateline":时间戳
+    }
+
+---
+
+### 企业一站式登录
+	ssoLogin(String account, String clientId, String clientSecret)
+	
+#### 参数
+
+| 参数 | 必须 | 类型 | 说明 |
+| --- | --- | --- | --- |
+| account | 是 | string | 账号 |
+| clientId | 是 | string | 申请应用时分配的AppKey |
+| clientSecret | 是 | string | 申请应用时分配的AppSecret |
+
+#### 返回结果
+
+    {
+        "gkkey":需要验证的gkkey
+    }
+
+---
+
+### 第三方登录
+	otherMethodToLogin(String key)
+	
+#### 参数
+
+| 参数 | 必须 | 类型 | 说明 |
+| --- | --- | --- | --- |
+| key | 是 | string | 需要验证的gkkey |
+
+#### 返回结果
+
+	{
+    	access_token:用于调用access_token，接口获取授权后的access token
+    	expires_in:access_token的有效期，unix时间戳
+    	refresh_token:用于刷新access_token 的 refresh_token，有效期1个月, 企业授权该值为null
+	}
+
+---
+
+### 单点登录调用
+	exchangeToken(String exchangeToken)
+	
+#### 参数
+
+| 参数 | 必须 | 类型 | 说明 |
+| --- | --- | --- | --- |
+| exchangeToken | 是 | string | 使用第三方token换取够快token |
+
+#### 返回结果
+
+	{
+    	access_token:用于调用access_token，接口获取授权后的access token
+    	expires_in:access_token的有效期，unix时间戳
+    	refresh_token:用于刷新access_token 的 refresh_token，有效期1个月, 企业授权该值为null
+	}
+
+---
+
 ## **账号API**
 
 ### 获取用户信息
@@ -2014,18 +2094,21 @@ list说明：
 ---
 
 ### 文件转存
-	fileSave(int mountId, String fileName, String fileHash, long fileSize, int targetMountId, String targetFullPath)
+	fileSave(int mountId, String fullPath, String fileName, String fileHash,
+	long fileSize, int targetMountId, String targetFullPath, String dialogId)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
 | mountId | 是 | int | 要转存的mount_id |
+| fullPath | 否 | string | 要转存文件fullPath(转存文件夹时) |
 | fileName | 是 | string | 要转存文件名称 |
 | fileHash | 否 | string | 要转存文件hash(转存文件时) |
 | fileSize | 否 | int | 要转存文件大小(转存文件时) |
 | targetMountId | 是 | string | 转存到的mount_id |
 | targetFullPath | 是 | string | 转存到的路径 |
+| dialogId | 否 | string | 会话ID(转存文件夹时) |
 
 #### 返回结果
 
@@ -2940,4 +3023,4 @@ list的数据结构
 	java -Dfile.encoding=utf-8 XX.jar		
 **方案3:** 如果使用的是 Apache Tomatcat，在 Java Options 上，添加 -Dfile.encoding=utf-8 即可。
 
-<img src="Screenshot/1.png" alt="Apache Tomatcat" title="Apache Tomatcat" width="50%" height="50%" />  
+<img src=https://repo.gokuai.cn/app/ImageResourceForMD/raw/master/YunkuJavaSDK/encoding.png alt="Apache Tomatcat" title="Apache Tomatcat" width="50%" height="50%" />  

@@ -3176,27 +3176,65 @@ public class YKHttpEngine extends HttpEngine {
     }
 
 
+//    /**
+//     * 文件转存
+//     *
+//     * @param mountId
+//     * @param fileName
+//     * @param fileHash
+//     * @param fileSize
+//     * @param targetMountId
+//     * @param targetFullPath
+//     */
+//    public String fileSave(int mountId, String fileName, String fileHash, long fileSize, int targetMountId, String targetFullPath) {
+//        HashMap<String, String> params = new HashMap<>();
+//        params.put("token", getToken());
+//        params.put("mount_id", mountId + "");
+//        params.put("filename", fileName + "");
+//        params.put("filehash", fileHash + "");
+//        params.put("filesize", fileSize + "");
+//        params.put("target_mount_id", targetMountId + "");
+//        params.put("target_fullpath", targetFullPath + "");
+//        params.put("sign", generateSign(params));
+//        String url = URL_API + URL_API_FILE_SAVE;
+//        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).setCheckAuth(true).executeSync();
+//    }
+
     /**
      * 文件转存
+     */
+    public String fileSave(int mountId, String fileName, String fileHash, long fileSize, int targetMountId, String targetFullPath) {
+
+        return fileSave(mountId, "", fileName, fileHash, fileSize, targetMountId, targetFullPath, null);
+    }
+
+    /**
+     * 文件（夹）转存
      *
      * @param mountId
+     * @param fullPath
      * @param fileName
      * @param fileHash
      * @param fileSize
      * @param targetMountId
      * @param targetFullPath
+     * @param dialogId
+     * @return
      */
-    public String fileSave(int mountId, String fileName, String fileHash, long fileSize, int targetMountId, String targetFullPath) {
+    public String fileSave(int mountId, String fullPath, String fileName, String fileHash, long fileSize,
+                           int targetMountId, String targetFullPath, String dialogId) {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("mount_id", mountId + "");
-        params.put("filename", fileName + "");
-        params.put("filehash", fileHash + "");
+        params.put("filename", fileName);
+        params.put("fullpath", fullPath);
+        params.put("filehash", fileHash);
         params.put("filesize", fileSize + "");
         params.put("target_mount_id", targetMountId + "");
-        params.put("target_fullpath", targetFullPath + "");
+        params.put("target_fullpath", targetFullPath);
+        params.put("dialog_id", dialogId);
         params.put("sign", generateSign(params));
-        String url = URL_API + URL_API_FILE_SAVE;
+        String url = URL_API + URL_API_GET_FILE_SAVE;
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).setCheckAuth(true).executeSync();
     }
 

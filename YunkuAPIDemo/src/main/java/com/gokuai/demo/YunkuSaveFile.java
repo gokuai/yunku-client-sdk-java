@@ -22,6 +22,8 @@ import java.util.Scanner;
 public class YunkuSaveFile {
 
     private static final String TAG = "YunkuSaveFile";
+    private static int targetMountId;
+    private static String dialogId;
 
     static {
         new ConfigHelper()
@@ -46,9 +48,20 @@ public class YunkuSaveFile {
 
         if (selectedData == null) return;
 
-        //接着将这个文件进行转存
+        //转存的是文件夹需要输入dialogId
+        if (selectedData.getDir() == 1) {
+
+            System.out.println("input dialogId");
+
+            Scanner scanner = new Scanner(System.in);
+
+            dialogId = scanner.nextLine();
+        }
+
+        //接着将这个文件(夹)进行转存，转存到根目录
         // state = 1,code =200 即成功保存
-        addFile(mountId, "new path/" + selectedData.getFullPath(), selectedData.getFileHash(), selectedData.getFileSize());
+        fileSave(mountId, selectedData.getFullPath(), selectedData.getFileName(), selectedData.getFileHash(),
+                selectedData.getFileSize(), targetMountId, "", dialogId);
     }
 
     /**
@@ -85,15 +98,21 @@ public class YunkuSaveFile {
         MountListData listData = MountListData.create(returnString);
         if (listData.getCode() == HttpURLConnection.HTTP_OK) {
 
-            System.out.println("input 0-" + (listData.getList().size() - 1));
+            System.out.println("input mountId and targetMountId， Separated by a blank key， The range is 0-" + (listData.getList().size() - 1));
 
             Scanner scanner = new Scanner(System.in);
 
             int number = scanner.nextInt();
 
+            int targetNumber = scanner.nextInt();
+
             mountId = listData.getList().get(number).getMountId();
 
+            targetMountId = listData.getList().get(targetNumber).getMountId();
+
             System.out.println("You select mount:" + listData.getList().get(number).getMountId());
+
+            System.out.println("You select TargetMount:" + listData.getList().get(targetNumber).getMountId());
 
         }
 
@@ -123,13 +142,6 @@ public class YunkuSaveFile {
             Scanner scanner = new Scanner(System.in);
             int number = scanner.nextInt();
 
-            FileData fileData = fileListData.getList().get(number);
-
-            if(fileData.getDir() == 1){
-                //文件夹不支持缓存
-                System.out.println("Directory is not supported");
-            }
-
             String fileFullPath = fileListData.getList().get(number).getFullPath();
 
             System.out.println("You select file:" + fileFullPath);
@@ -141,14 +153,14 @@ public class YunkuSaveFile {
     }
 
     /**
-     * 文件上传
+     * 转存文件（夹）
      */
-    private static void addFile(int mountId, String targetFullPath, String filehash, long filesize) {
+    private static void fileSave(int mountId, String fullPath, String fileName, String fileHash, long fileSize, int targetMountId, String targetFullPath, String dialogId) {
 
-        LogPrint.info(TAG, "====== addFile\n");
+        LogPrint.info(TAG, "====== fileSave\n");
 
         String returnString = YKHttpEngine.getInstance()
-                .addFile(mountId, targetFullPath, filehash, filesize);
+                .fileSave(mountId, fullPath, fileName, fileHash, fileSize, targetMountId, targetFullPath, dialogId);
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
