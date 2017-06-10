@@ -44,9 +44,10 @@ public class UploadRunnable implements Runnable {
     private UploadCallBack mCallBack;
     private long mRId;
     private InputStream mInputStream;
+    private YKHttpEngine mYkHttpEngine;
 
     public UploadRunnable(String localFullPath, int mountId, String fullPath,
-                             long dateline, UploadCallBack callBack) {
+                          long dateline, YKHttpEngine ykHttpEngine, UploadCallBack callBack) {
 
         this.mLocalFullPath = localFullPath;
         this.mFullPath = fullPath;
@@ -54,10 +55,11 @@ public class UploadRunnable implements Runnable {
         this.mDateline = dateline;
         this.mCallBack = callBack;
         this.mRId = nextThreadID();
+        this.mYkHttpEngine = ykHttpEngine;
     }
 
     public UploadRunnable(InputStream inputStream, int mountId, String fullPath,
-                          long dateline, UploadCallBack callBack) {
+                          long dateline, YKHttpEngine ykHttpEngine, UploadCallBack callBack) {
 
         this.mInputStream = inputStream;
         this.mFullPath = fullPath;
@@ -65,6 +67,7 @@ public class UploadRunnable implements Runnable {
         this.mDateline = dateline;
         this.mCallBack = callBack;
         this.mRId = nextThreadID();
+        this.mYkHttpEngine = ykHttpEngine;
     }
 
     private static synchronized long nextThreadID() {
@@ -89,8 +92,8 @@ public class UploadRunnable implements Runnable {
                     return;
                 }
 
-            filehash = Util.getFileSha1(mLocalFullPath);
-            filesize = file.length();
+                filehash = Util.getFileSha1(mLocalFullPath);
+                filesize = file.length();
             }
             String filename = Util.getNameFromPath(fullpath).replace("/", "");
 
@@ -101,108 +104,119 @@ public class UploadRunnable implements Runnable {
                 filesize = fileInfo.fileSize;
             }
 
-            ReturnResult returnResult = ReturnResult.create(YKHttpEngine.getInstance()
-                    .addFile(mMountId, fullpath, filehash, filesize));
+            ReturnResult returnResult = ReturnResult.create(mYkHttpEngine.addFile(mMountId, fullpath, filehash, filesize));
 
             FileOperationData data = FileOperationData.create(returnResult.getResult(), returnResult.getStatusCode());
 
             if (data != null) {
-                if (data.getCode() == HttpStatus.SC_OK) {
+                if (data.getCode() == HttpURLConnection.HTTP_OK) {
                     if (data.getState() != FileOperationData.STATE_NOUPLOAD) {
                         // 服务器上没有，上传文件
                         mServer = data.getServer();
 
                         if (TextUtils.isEmpty(mServer)) {
                             throw new Exception(" The server is empty ");
-                        }else {
+                        } else {
                             LogPrint.info(LOG_TAG, "The server is " + mServer);
                         }
 
                         // upload_init
-                        upload_init(data.getHash(), filename, fullpath, filehash, filesize);
+                        int errorCode = upload_init(data.getHash(), filename, fullpath, filehash, filesize);
 
-                        // upload_part
-                        if (mInputStream != null) {
-                            in = mInputStream;
-                        } else {
-                            in = new FileInputStream(mLocalFullPath);
-                        }
-
-                        if (in == null) {
-                            throw new Exception(" error file InputStream ");
-                        }
-
-                        bis = new BufferedInputStream(in);
-
-                        int code = 0;
-                        long range_index = 0;
-                        long range_end = 0;
-                        long datalength = -1;
-                        long crc32 = 0;
-                        String range = "";
-                        byte[] buffer = new byte[RANG_SIZE];
-                        CRC32 crc = new CRC32();
-                        bis.mark(RANG_SIZE);
-                        while ((datalength = bis.read(buffer)) != -1 && !isStop) {
-
-                            range_end = RANG_SIZE * (range_index + 1) - 1;
-                            if (range_end >= filesize) {
-                                range_end = filesize - 1;
-                                int length_end = (int) (filesize - RANG_SIZE * range_index);
-                                byte[] buffer_end = new byte[length_end];
-                                System.arraycopy(buffer, 0, buffer_end, 0, length_end);
-                                crc.update(buffer_end);
-                                crc32 = crc.getValue();
+                        if (errorCode == HttpURLConnection.HTTP_OK) {
+                            // upload_part
+                            if (mInputStream != null) {
+                                in = mInputStream;
                             } else {
-                                crc.update(buffer);
-                                crc32 = crc.getValue();
+                                in = new FileInputStream(mLocalFullPath);
                             }
-                            crc.reset();
-                            long currentLength = RANG_SIZE * range_index;
-                            range = currentLength + "-" + range_end;
 
-                            mCallBack.onProgress(mRId, (float) currentLength / (float) filesize);
-                            result = upload_part(range, buffer, (int) datalength, crc32);
-                            code = result.getStatusCode();
-                            if (code == HttpStatus.SC_OK) {
-                                // 200
-                                bis.mark(RANG_SIZE);
-                                range_index++;
-                                System.gc();
-                            } else if (code == HttpStatus.SC_ACCEPTED) {
-                                // 202-上传的文件已完成, 可以直接调finish接口
-                                break;
-                            } else if (code >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-                                // >=500-服务器错误
-                                upload_server(filesize, filehash, fullpath);
-                                continue;
-                            } else if (code == HttpStatus.SC_UNAUTHORIZED) {
-                                // 401-session验证不通过
-                                upload_init(data.getHash(), filename, fullpath,
-                                        filehash, filesize);
-                                continue;
-                            } else if (code == HttpStatus.SC_CONFLICT) {
-                                // 409-上传块序号错误, http内容中给出服务器期望的块序号
-                                JSONObject json = new JSONObject(result.getResult());
-                                long part_range_start = Long.parseLong(json.optString("expect"));
-                                range_index = part_range_start / RANG_SIZE;
-                                bis.reset();
-                                bis.skip(part_range_start);
-                                continue;
-                            } else {
+                            if (in == null) {
+                                throw new Exception(" error file InputStream ");
+                            }
 
-                                throw new Exception();
+                            bis = new BufferedInputStream(in);
+
+                            int code = 0;
+                            long range_index = 0;
+                            long range_end = 0;
+                            long datalength = -1;
+                            long crc32 = 0;
+                            String range = "";
+                            byte[] buffer = new byte[RANG_SIZE];
+                            CRC32 crc = new CRC32();
+                            bis.mark(RANG_SIZE);
+                            while ((datalength = bis.read(buffer)) != -1 && !isStop) {
+
+                                range_end = RANG_SIZE * (range_index + 1) - 1;
+                                if (range_end >= filesize) {
+                                    range_end = filesize - 1;
+                                    int length_end = (int) (filesize - RANG_SIZE * range_index);
+                                    byte[] buffer_end = new byte[length_end];
+                                    System.arraycopy(buffer, 0, buffer_end, 0, length_end);
+                                    crc.update(buffer_end);
+                                    crc32 = crc.getValue();
+                                } else {
+                                    crc.update(buffer);
+                                    crc32 = crc.getValue();
+                                }
+                                crc.reset();
+                                long currentLength = RANG_SIZE * range_index;
+                                range = currentLength + "-" + range_end;
+
+                                mCallBack.onProgress(mRId, (float) currentLength / (float) filesize);
+                                result = upload_part(range, buffer, (int) datalength, crc32);
+                                code = result.getStatusCode();
+                                if (code == HttpStatus.SC_OK) {
+                                    // 200
+                                    bis.mark(RANG_SIZE);
+                                    range_index++;
+                                    System.gc();
+                                } else if (code == HttpStatus.SC_ACCEPTED) {
+                                    // 202-上传的文件已完成, 可以直接调finish接口
+                                    break;
+                                } else if (code >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+                                    // >=500-服务器错误
+                                    upload_server(filesize, filehash, fullpath);
+                                    continue;
+                                } else if (code == HttpStatus.SC_UNAUTHORIZED) {
+                                    // 401-session验证不通过
+                                    upload_init(data.getHash(), filename, fullpath,
+                                            filehash, filesize);
+                                    continue;
+                                } else if (code == HttpStatus.SC_CONFLICT) {
+                                    // 409-上传块序号错误, http内容中给出服务器期望的块序号
+                                    JSONObject json = new JSONObject(result.getResult());
+                                    long part_range_start = Long.parseLong(json.optString("expect"));
+                                    range_index = part_range_start / RANG_SIZE;
+                                    bis.reset();
+                                    bis.skip(part_range_start);
+                                    continue;
+                                } else {
+
+                                    throw new Exception();
+                                }
                             }
                         }
 
                         // upload_check
-                        upload_check();
+                        do {
+                            //大文件数据没有存储完毕，需要等一会再检查一遍
+                            errorCode = upload_check();
+
+                            if (errorCode == HttpURLConnection.HTTP_OK) {
+                                break;
+                            }
+
+                            Thread.sleep(3000);
+
+                        } while (errorCode == HttpURLConnection.HTTP_ACCEPTED);
                     }
 
                     // upload_sussec
                     if (mCallBack != null) {
                         mCallBack.onProgress(mRId, 1);
-                        mCallBack.onSuccess(mRId, filehash);
+                        mCallBack.onSuccess(mRId, returnResult.getResult());
                     }
                 } else {
                     // 上传失败
@@ -247,14 +261,17 @@ public class UploadRunnable implements Runnable {
      *
      * @throws Exception
      */
-    private void upload_check() throws Exception {
+
+    private int upload_check() throws Exception {
         String returnString = upload_finish();
         ReturnResult result = ReturnResult.create(returnString);
-        if (result.getStatusCode() == HttpStatus.SC_OK) {
-            return;
+        if (result.getStatusCode() == HttpURLConnection.HTTP_OK
+                || result.getStatusCode() == HttpURLConnection.HTTP_ACCEPTED) {
+            return result.getStatusCode();
         } else {
             throw new Exception();
         }
+
     }
 
     /**
@@ -265,7 +282,7 @@ public class UploadRunnable implements Runnable {
      * @param fullPath
      */
     private void upload_server(long filesize, String filehash, String fullPath) {
-        ReturnResult returnResult = ReturnResult.create(YKHttpEngine.getInstance().addFile(mMountId, fullPath, filehash, filesize));
+        ReturnResult returnResult = ReturnResult.create(mYkHttpEngine.addFile(mMountId, fullPath, filehash, filesize));
         FileOperationData data = FileOperationData.create(returnResult.getResult(), returnResult.getStatusCode());
         if (data != null) {
             mServer = data.getServer();
@@ -281,8 +298,8 @@ public class UploadRunnable implements Runnable {
      * @param filesize
      * @throws Exception
      */
-    private void upload_init(String hash, String filename, String fullpath,
-                             String filehash, long filesize) throws Exception {
+    private int upload_init(String hash, String filename, String fullpath,
+                            String filehash, long filesize) throws Exception {
         String url = mServer + URL_UPLOAD_INIT;
         final HashMap<String, String> headParams = new HashMap<>();
         headParams.put("x-gk-upload-pathhash", hash);
@@ -290,19 +307,20 @@ public class UploadRunnable implements Runnable {
         headParams.put("x-gk-upload-filehash", filehash);
         headParams.put("x-gk-upload-filesize", String.valueOf(filesize));
         headParams.put("x-gk-upload-mountid", String.valueOf(mMountId));
-        headParams.put("x-gk-token", YKHttpEngine.getInstance().getToken());
+        headParams.put("x-gk-token", mYkHttpEngine.getToken());
         String returnString = NetConnection.sendRequest(url, RequestMethod.POST, null, headParams);
         ReturnResult returnResult = ReturnResult.create(returnString);
-        if (returnResult != null) {
-            if (returnResult.getStatusCode() == HttpURLConnection.HTTP_OK) {
-                JSONObject json = new JSONObject(returnResult.getResult());
-                mSession = json.optString("session");
-            } else if (returnResult.getStatusCode() >= HttpURLConnection.HTTP_INTERNAL_ERROR) {
-                upload_server(filesize, fullpath, filehash);
-                upload_init(hash, filename, fullpath, filehash, filesize);
-            } else {
-                throw new Exception();
-            }
+        if (returnResult.getStatusCode() == HttpURLConnection.HTTP_OK) {
+            JSONObject json = new JSONObject(returnResult.getResult());
+            mSession = json.optString("session");
+            return returnResult.getStatusCode();
+        } else if (returnResult.getStatusCode() == HttpURLConnection.HTTP_ACCEPTED) {
+            return returnResult.getStatusCode();
+        } else if (returnResult.getStatusCode() >= HttpURLConnection.HTTP_INTERNAL_ERROR) {
+            upload_server(filesize, fullpath, filehash);
+            return upload_init(hash, filename, fullpath, filehash, filesize);
+        } else {
+            throw new Exception();
         }
 
     }
