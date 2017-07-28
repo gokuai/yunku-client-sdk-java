@@ -29,6 +29,7 @@ public class YKHttpEngine extends HttpEngine {
 
     private final static String LOG_TAG = YKHttpEngine.class.getSimpleName();
     private final static int FILE_SIZE_NONE = -1;
+    private final static int RANG_SIZE = 524288;
 
     protected String URL_API = YKConfig.SCHEME_PROTOCOL + YKConfig.URL_API_HOST;
     private String URL_OAUTH = URL_API + "/oauth2/token2";
@@ -3152,6 +3153,11 @@ public class YKHttpEngine extends HttpEngine {
      */
 
     public UploadRunnable uploadByBlock(int mountId, String fullPath, String localFilePath,
+                                        UploadCallBack callBack) {
+        return uploadByBlock(mountId, fullPath, localFilePath, RANG_SIZE, callBack);
+    }
+
+    public UploadRunnable uploadByBlock(int mountId, String fullPath, String localFilePath,
                                         int rangSize, UploadCallBack callBack) {
         UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), this, callBack, rangSize);
         Thread thread = new Thread(uploadRunnable);
@@ -3167,6 +3173,11 @@ public class YKHttpEngine extends HttpEngine {
      * @param callBack
      * @return
      */
+    public UploadRunnable uploadByBlock(int mountId, String fullPath, InputStream localFilePath,
+                                        UploadCallBack callBack) {
+        return uploadByBlock(mountId, fullPath, localFilePath, RANG_SIZE, callBack);
+    }
+
     public UploadRunnable uploadByBlock(int mountId, String fullPath, InputStream localFilePath,
                                         int rangSize, UploadCallBack callBack) {
         UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), this, callBack, rangSize);

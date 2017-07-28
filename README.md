@@ -1574,6 +1574,34 @@ list说明：
 | filesize | bigint | 文件的大小 |
 
 ---
+	
+### 文件分块上传
+	uploadByBlock(int mountId, String fullPath, String localFilePath,
+                                            int rangSize, UploadCallBack callBack)
+#### 参数 
+| 参数 | 必须 | 类型 | 说明 |	
+|------|------|------|------|
+| mountId | 是 | int | mount_id |
+| fullpath | 是 | string | 文件路径 |
+| localFilePath | 是 | string | 文件本地路径 |
+| rangSize | 否 | int | 分块上传大小，不传默认为512K |
+| callBack | 是 | UploadCallBack | 文件上传回调 |
+
+---
+
+### 数据流分块上传
+	uploadByBlock(int mountId, String fullPath, InputStream localFilePath,
+                                            int rangSize, UploadCallBack callBack)
+#### 参数 
+| 参数 | 必须 | 类型 | 说明 |	
+|------|------|------|------|
+| mountId | 是 | int | mount_id |
+| fullpath | 是 | string | 文件路径 |
+| inputStream | 是 | InputStream | 流数据 |
+| rangSize | 否 | int | 分块上传大小，不传默认为512K |
+| callBack | 是 | UploadCallBack | 文件上传回调 |
+
+---  
 
 ### 批量删除文件文件夹
 	batchDeleteFileAsync(final int mountId, final ArrayList<String> fullPaths)
