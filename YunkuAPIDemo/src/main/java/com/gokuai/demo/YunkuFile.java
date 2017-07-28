@@ -27,7 +27,7 @@ public class YunkuFile {
     private static final String TAG = "YunkuFile";
 
     static {
-        new ConfigHelper().client(ClientConfig.CLIENT_ID,ClientConfig.CLIENT_SECRET).config();
+        new ConfigHelper().client(ClientConfig.CLIENT_ID, ClientConfig.CLIENT_SECRET).config();
 
     }
 
@@ -213,7 +213,7 @@ public class YunkuFile {
     static void getFileInfo() {
         LogPrint.info(TAG, "====== getFileInfo\n");
 
-        String returnString = YKHttpEngine.getInstance().getFileInfoSync("Folder Test", 1221861, "");
+        String returnString = YKHttpEngine.getInstance().getFileInfoSync("testRangSize1.jpg", 1221861, "");
 
         DeserializeHelper.getInstance().deserializeResult(returnString);
     }
@@ -260,8 +260,8 @@ public class YunkuFile {
      */
     static void fileUploadByBlock() {
 
-        YKHttpEngine.getInstance().uploadByBlock(1221861, "ps.txt",
-                "YunkuAPILibrary/testData/ps.txt", new UploadCallBack() {
+        YKHttpEngine.getInstance().uploadByBlock(1221861, "testRangSize.jpg",
+                "YunkuAPILibrary/testData/test.jpg", 65536, new UploadCallBack() {
                     @Override
                     public void onSuccess(long threadId, String result) {
                         System.out.println("onSuccess threadId：" + threadId + ",result：" + result);
@@ -285,7 +285,7 @@ public class YunkuFile {
     /**
      * 流文件上传 （分块上传）
      */
-    static void fileUploadByStream(){
+    static void fileUploadByStream() {
 
         InputStream inputStream = null;
         try {
@@ -294,8 +294,8 @@ public class YunkuFile {
             e.printStackTrace();
         }
 
-        YKHttpEngine.getInstance().uploadByBlock(1221861, "fileUploadByStream.jpg",
-                inputStream, new UploadCallBack() {
+        YKHttpEngine.getInstance().uploadByBlock(1221861, "testRangSize1.jpg",
+                inputStream, 65536, new UploadCallBack() {
                     @Override
                     public void onSuccess(long threadId, String result) {
                         System.out.println("onSuccess threadId：" + threadId + ",result：" + result);

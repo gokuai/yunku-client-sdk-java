@@ -29,7 +29,7 @@ public class YunkuFileTest {
     public static String TEST_FILE_PATH = "YunkuAPILibrary/testData/test.jpg";
 
     static {
-        new ConfigHelper().client(CLIENT_ID,CLIENT_SECRET).config();
+        new ConfigHelper().client(CLIENT_ID, CLIENT_SECRET).config();
         YKHttpEngine.getInstance().loginSync(USERNAME, PASSWORD);
     }
 
@@ -50,7 +50,7 @@ public class YunkuFileTest {
     @Test
     public void getFileLink() throws Exception {
         String s = YKHttpEngine.getInstance().getFileLink("v2.png", 1221861, "", "",
-                "","","");
+                "", "", "");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
@@ -64,7 +64,7 @@ public class YunkuFileTest {
 
     @Test
     public void addFavorities() throws Exception {
-        String s = YKHttpEngine.getInstance().addFavorities(1221861,"v2.png",0);
+        String s = YKHttpEngine.getInstance().addFavorities(1221861, "v2.png", 0);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
@@ -135,7 +135,7 @@ public class YunkuFileTest {
     @Ignore("uploadFile is ignored")
     @Test
     public void uploadFile() throws Exception {
-        String s = YKHttpEngine.getInstance().uploadFile(1221861,"test.jpg","qp", TEST_FILE_PATH,false);
+        String s = YKHttpEngine.getInstance().uploadFile(1221861, "test.jpg", "qp", TEST_FILE_PATH, false);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
@@ -144,7 +144,7 @@ public class YunkuFileTest {
     public void batchDeleteFileAsync() throws Exception {
         ArrayList<String> fullPaths = new ArrayList<>();
         fullPaths.add("test.jpg");
-        String s = YKHttpEngine.getInstance().batchDeleteFileAsync(1221861,fullPaths);
+        String s = YKHttpEngine.getInstance().batchDeleteFileAsync(1221861, fullPaths);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
@@ -154,7 +154,7 @@ public class YunkuFileTest {
     public void fileBatchCopy() throws Exception {
         ArrayList<String> fullPaths = new ArrayList<>();
         fullPaths.add("test.jpg");
-        String s = YKHttpEngine.getInstance().fileBatchCopy(1221861,fullPaths,1221862,"test.jpg");
+        String s = YKHttpEngine.getInstance().fileBatchCopy(1221861, fullPaths, 1221862, "test.jpg");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
@@ -163,21 +163,21 @@ public class YunkuFileTest {
     public void fileBatchMove() throws Exception {
         ArrayList<String> fullPaths = new ArrayList<>();
         fullPaths.add("test.jpg");
-        String s = YKHttpEngine.getInstance().fileBatchMove(1221861,fullPaths,1221861,"test.jpg");
+        String s = YKHttpEngine.getInstance().fileBatchMove(1221861, fullPaths, 1221861, "test.jpg");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void getDownloadFileUrlByFileHash() throws Exception {
-        String s = YKHttpEngine.getInstance().getDownloadFileUrlByFileHash(1221861,"913b52ae320f26b08a2b0108f1ca053f71cde781");
+        String s = YKHttpEngine.getInstance().getDownloadFileUrlByFileHash(1221861, "913b52ae320f26b08a2b0108f1ca053f71cde781");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void getUrlByFileHash() throws Exception {
-        YKHttpEngine.getInstance().getUrlByFileHash(1221861,"913b52ae320f26b08a2b0108f1ca053f71cde781", "", false, new HttpEngine.DataListener() {
+        YKHttpEngine.getInstance().getUrlByFileHash(1221861, "913b52ae320f26b08a2b0108f1ca053f71cde781", "", false, new HttpEngine.DataListener() {
             @Override
             public void onReceivedData(int apiId, Object object, int errorId) {
                 if (apiId == YKHttpEngine.API_ID_LOGIN) {
@@ -190,35 +190,35 @@ public class YunkuFileTest {
 
     @Test
     public void setFilePermission() throws Exception {
-        String s = YKHttpEngine.getInstance().setFilePermission(1221861,"v2.png", "",false);
+        String s = YKHttpEngine.getInstance().setFilePermission(1221861, "v2.png", "", false);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void getMemberFolderPermission() throws Exception {
-        String s = YKHttpEngine.getInstance().getMemberFolderPermission(1221861,"v2.png", 0,0);
+        String s = YKHttpEngine.getInstance().getMemberFolderPermission(1221861, "v2.png", 0, 0);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void getGroupFolderPermission() throws Exception {
-        String s = YKHttpEngine.getInstance().getGroupFolderPermission(1221861,"v2.png", 0,0);
+        String s = YKHttpEngine.getInstance().getGroupFolderPermission(1221861, "v2.png", 0, 0);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void getFileInfoSync() throws Exception {
-        String s = YKHttpEngine.getInstance().getFileInfoSync("v2.png",1221861, "");
+        String s = YKHttpEngine.getInstance().getFileInfoSync("v2.png", 1221861, "");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void getFileInfoByHash() throws Exception {
-        String s = YKHttpEngine.getInstance().getFileInfoByHash("8ac70c619d8051c9fe9ec474b691740413851f63",1221861);
+        String s = YKHttpEngine.getInstance().getFileInfoByHash("8ac70c619d8051c9fe9ec474b691740413851f63", 1221861);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
@@ -232,28 +232,28 @@ public class YunkuFileTest {
 
     @Test
     public void getDownloadFileUrlByPath() throws Exception {
-        String s = YKHttpEngine.getInstance().getDownloadFileUrlByPath(1221861,"v2.png","");
+        String s = YKHttpEngine.getInstance().getDownloadFileUrlByPath(1221861, "v2.png", "");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void fileExistByHash() throws Exception {
-        String s = YKHttpEngine.getInstance().fileExistByHash("8ac70c619d8051c9fe9ec474b691740413851f63",1221861);
+        String s = YKHttpEngine.getInstance().fileExistByHash("8ac70c619d8051c9fe9ec474b691740413851f63", 1221861);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void fileExistByFullPath() throws Exception {
-        String s = YKHttpEngine.getInstance().fileExistByFullPath("v2.png",1221861);
+        String s = YKHttpEngine.getInstance().fileExistByFullPath("v2.png", 1221861);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void createFolder() throws Exception {
-        String s = YKHttpEngine.getInstance().createFolder(1221861,"test for YunkuFileTest");
+        String s = YKHttpEngine.getInstance().createFolder(1221861, "test for YunkuFileTest");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
@@ -261,49 +261,49 @@ public class YunkuFileTest {
     @Ignore("addFile is ignored")
     @Test
     public void addFile() throws Exception {
-        String s = YKHttpEngine.getInstance().addFile(1221861,"v3.png","913b52ae320f26b08a2b0108f1ca053f71cde781",7376);
+        String s = YKHttpEngine.getInstance().addFile(1221861, "v3.png", "913b52ae320f26b08a2b0108f1ca053f71cde781", 7376);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void getHistory() throws Exception {
-        String s = YKHttpEngine.getInstance().getHistory(1221861,"v2.png");
+        String s = YKHttpEngine.getInstance().getHistory(1221861, "v2.png");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void revert() throws Exception {
-        String s = YKHttpEngine.getInstance().revert("v2.png",1221861,"");
+        String s = YKHttpEngine.getInstance().revert("v2.png", 1221861, "");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void fileSearch() throws Exception {
-        String s = YKHttpEngine.getInstance().fileSearch("v2",1221861);
+        String s = YKHttpEngine.getInstance().fileSearch("v2", 1221861);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void addFileRemark() throws Exception {
-        String s = YKHttpEngine.getInstance().addFileRemark(1221861,"v2.png","test1");
+        String s = YKHttpEngine.getInstance().addFileRemark(1221861, "v2.png", "test1");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void getFileRemarkList() throws Exception {
-        String s = YKHttpEngine.getInstance().getFileRemarkList(1221861,"v2.png",0,0);
+        String s = YKHttpEngine.getInstance().getFileRemarkList(1221861, "v2.png", 0, 0);
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void createOffline() throws Exception {
-        YKHttpEngine.getInstance().getUrlByFileHash(1221861,"9187d349dfeaa17059f9606b7864614b2df5af31", "", false, new HttpEngine.DataListener() {
+        YKHttpEngine.getInstance().getUrlByFileHash(1221861, "9187d349dfeaa17059f9606b7864614b2df5af31", "", false, new HttpEngine.DataListener() {
             @Override
             public void onReceivedData(int apiId, Object object, int errorId) {
                 if (apiId == YKHttpEngine.API_ID_LOGIN) {
@@ -316,21 +316,21 @@ public class YunkuFileTest {
 
     @Test
     public void setFileKeyWord() throws Exception {
-        String s = YKHttpEngine.getInstance().setFileKeyWord(1221861,"v2.png","test2");
+        String s = YKHttpEngine.getInstance().setFileKeyWord(1221861, "v2.png", "test2");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
-    @Ignore("uploadByBlock is ignored")
+//    @Ignore("uploadByBlock is ignored")
     @Test
     public void uploadByBlock() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
-        Assert.assertEquals(true,new File(TEST_FILE_PATH).exists());
-        YKHttpEngine.getInstance().uploadByBlock(1221861, "v3.png", TEST_FILE_PATH, new UploadCallBack() {
+        Assert.assertEquals(true, new File(TEST_FILE_PATH).exists());
+        YKHttpEngine.getInstance().uploadByBlock(1221861, "testRangSize.png", TEST_FILE_PATH, 65536, new UploadCallBack() {
             @Override
             public void onSuccess(long threadId, String result) {
                 latch.countDown();
-                Assert.assertEquals(1,threadId);
+                Assert.assertEquals(1, threadId);
                 System.out.println("success:" + threadId);
             }
 
@@ -351,14 +351,14 @@ public class YunkuFileTest {
     @Ignore("fileSave is ignored")
     @Test
     public void fileSave() throws Exception {
-        String s = YKHttpEngine.getInstance().fileSave(0, "", "",0,0,"");
+        String s = YKHttpEngine.getInstance().fileSave(0, "", "", 0, 0, "");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }
 
     @Test
     public void renameFile() throws Exception {
-        String s = YKHttpEngine.getInstance().renameFile( "v2.png",1221861, "v2.png");
+        String s = YKHttpEngine.getInstance().renameFile("v2.png", 1221861, "v2.png");
         ReturnResult r = ReturnResult.create(s);
         Assert.assertEquals(200, r.getStatusCode());
     }

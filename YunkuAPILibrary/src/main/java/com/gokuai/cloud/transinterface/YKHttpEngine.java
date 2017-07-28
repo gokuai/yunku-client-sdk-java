@@ -3152,8 +3152,8 @@ public class YKHttpEngine extends HttpEngine {
      */
 
     public UploadRunnable uploadByBlock(int mountId, String fullPath, String localFilePath,
-                                        UploadCallBack callBack) {
-        UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), this, callBack);
+                                        int rangSize, UploadCallBack callBack) {
+        UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), this, callBack, rangSize);
         Thread thread = new Thread(uploadRunnable);
         thread.start();
         return uploadRunnable;
@@ -3168,8 +3168,8 @@ public class YKHttpEngine extends HttpEngine {
      * @return
      */
     public UploadRunnable uploadByBlock(int mountId, String fullPath, InputStream localFilePath,
-                                        UploadCallBack callBack) {
-        UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), this, callBack);
+                                        int rangSize, UploadCallBack callBack) {
+        UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), this, callBack, rangSize);
         Thread thread = new Thread(uploadRunnable);
         thread.start();
         return uploadRunnable;

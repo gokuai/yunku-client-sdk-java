@@ -28,7 +28,8 @@ public class UploadRunnable implements Runnable {
     private static final String URL_UPLOAD_ABORT = "/upload_abort";
     private static final String URL_UPLOAD_FINISH = "/upload_finish";
     private static final String URL_UPLOAD_REQ = "/upload_req";
-    private static final int RANG_SIZE = 65536;// 上传分块大小-64K
+
+    private int mRangSize = 524288;// 上传分块大小-512K
 
     private String mServer = "";// 上传服务器地址
     private String mSession = "";// 上传session
@@ -47,7 +48,7 @@ public class UploadRunnable implements Runnable {
     private YKHttpEngine mYkHttpEngine;
 
     public UploadRunnable(String localFullPath, int mountId, String fullPath,
-                          long dateline, YKHttpEngine ykHttpEngine, UploadCallBack callBack) {
+                          long dateline, YKHttpEngine ykHttpEngine, UploadCallBack callBack, int rangSize) {
 
         this.mLocalFullPath = localFullPath;
         this.mFullPath = fullPath;
@@ -56,10 +57,11 @@ public class UploadRunnable implements Runnable {
         this.mCallBack = callBack;
         this.mRId = nextThreadID();
         this.mYkHttpEngine = ykHttpEngine;
+        this.mRangSize = rangSize;
     }
 
     public UploadRunnable(InputStream inputStream, int mountId, String fullPath,
-                          long dateline, YKHttpEngine ykHttpEngine, UploadCallBack callBack) {
+                          long dateline, YKHttpEngine ykHttpEngine, UploadCallBack callBack, int rangSize) {
 
         this.mInputStream = inputStream;
         this.mFullPath = fullPath;
@@ -68,6 +70,7 @@ public class UploadRunnable implements Runnable {
         this.mCallBack = callBack;
         this.mRId = nextThreadID();
         this.mYkHttpEngine = ykHttpEngine;
+        this.mRangSize = rangSize;
     }
 
     private static synchronized long nextThreadID() {
@@ -143,15 +146,15 @@ public class UploadRunnable implements Runnable {
                             long datalength = -1;
                             long crc32 = 0;
                             String range = "";
-                            byte[] buffer = new byte[RANG_SIZE];
+                            byte[] buffer = new byte[mRangSize];
                             CRC32 crc = new CRC32();
-                            bis.mark(RANG_SIZE);
+                            bis.mark(mRangSize);
                             while ((datalength = bis.read(buffer)) != -1 && !isStop) {
 
-                                range_end = RANG_SIZE * (range_index + 1) - 1;
+                                range_end = mRangSize * (range_index + 1) - 1;
                                 if (range_end >= filesize) {
                                     range_end = filesize - 1;
-                                    int length_end = (int) (filesize - RANG_SIZE * range_index);
+                                    int length_end = (int) (filesize - mRangSize * range_index);
                                     byte[] buffer_end = new byte[length_end];
                                     System.arraycopy(buffer, 0, buffer_end, 0, length_end);
                                     crc.update(buffer_end);
@@ -161,7 +164,7 @@ public class UploadRunnable implements Runnable {
                                     crc32 = crc.getValue();
                                 }
                                 crc.reset();
-                                long currentLength = RANG_SIZE * range_index;
+                                long currentLength = mRangSize * range_index;
                                 range = currentLength + "-" + range_end;
 
                                 mCallBack.onProgress(mRId, (float) currentLength / (float) filesize);
@@ -169,7 +172,7 @@ public class UploadRunnable implements Runnable {
                                 code = result.getStatusCode();
                                 if (code == HttpStatus.SC_OK) {
                                     // 200
-                                    bis.mark(RANG_SIZE);
+                                    bis.mark(mRangSize);
                                     range_index++;
                                     System.gc();
                                 } else if (code == HttpStatus.SC_ACCEPTED) {
@@ -188,7 +191,7 @@ public class UploadRunnable implements Runnable {
                                     // 409-上传块序号错误, http内容中给出服务器期望的块序号
                                     JSONObject json = new JSONObject(result.getResult());
                                     long part_range_start = Long.parseLong(json.optString("expect"));
-                                    range_index = part_range_start / RANG_SIZE;
+                                    range_index = part_range_start / mRangSize;
                                     bis.reset();
                                     bis.skip(part_range_start);
                                     continue;
