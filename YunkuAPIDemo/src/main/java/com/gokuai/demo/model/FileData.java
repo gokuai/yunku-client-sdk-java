@@ -14,16 +14,26 @@ public class FileData {
     String fileHash;
     int dir;
     int mountId;
+    String fileName;
 
     public static FileData create(JSONObject jsonObject) {
         FileData filedata = new FileData();
         filedata.fullPath = jsonObject.optString("fullpath");
+        filedata.fileName = jsonObject.optString("filename");
         filedata.hash = jsonObject.optString("hash");
         filedata.fileSize = jsonObject.optLong("filesize");
         filedata.fileHash = jsonObject.optString("filehash");
         filedata.dir = jsonObject.optInt("dir");
         filedata.mountId = jsonObject.optInt("mount_id");
         return filedata;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getFullPath() {

@@ -29,6 +29,7 @@ public class YKHttpEngine extends HttpEngine {
 
     private final static String LOG_TAG = YKHttpEngine.class.getSimpleName();
     private final static int FILE_SIZE_NONE = -1;
+    private final static int RANG_SIZE = 524288;
 
     protected String URL_API = YKConfig.SCHEME_PROTOCOL + YKConfig.URL_API_HOST;
     private String URL_OAUTH = URL_API + "/oauth2/token2";
@@ -3153,7 +3154,12 @@ public class YKHttpEngine extends HttpEngine {
 
     public UploadRunnable uploadByBlock(int mountId, String fullPath, String localFilePath,
                                         UploadCallBack callBack) {
-        UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), this, callBack);
+        return uploadByBlock(mountId, fullPath, localFilePath, RANG_SIZE, callBack);
+    }
+
+    public UploadRunnable uploadByBlock(int mountId, String fullPath, String localFilePath,
+                                        int rangSize, UploadCallBack callBack) {
+        UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), this, callBack, rangSize);
         Thread thread = new Thread(uploadRunnable);
         thread.start();
         return uploadRunnable;
@@ -3169,34 +3175,77 @@ public class YKHttpEngine extends HttpEngine {
      */
     public UploadRunnable uploadByBlock(int mountId, String fullPath, InputStream localFilePath,
                                         UploadCallBack callBack) {
-        UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), this, callBack);
+        return uploadByBlock(mountId, fullPath, localFilePath, RANG_SIZE, callBack);
+    }
+
+    public UploadRunnable uploadByBlock(int mountId, String fullPath, InputStream localFilePath,
+                                        int rangSize, UploadCallBack callBack) {
+        UploadRunnable uploadRunnable = new UploadRunnable(localFilePath, mountId, fullPath, Util.getUnixDateline(), this, callBack, rangSize);
         Thread thread = new Thread(uploadRunnable);
         thread.start();
         return uploadRunnable;
     }
 
 
+//    /**
+//     * 文件转存
+//     *
+//     * @param mountId
+//     * @param fileName
+//     * @param fileHash
+//     * @param fileSize
+//     * @param targetMountId
+//     * @param targetFullPath
+//     */
+//    public String fileSave(int mountId, String fileName, String fileHash, long fileSize, int targetMountId, String targetFullPath) {
+//        HashMap<String, String> params = new HashMap<>();
+//        params.put("token", getToken());
+//        params.put("mount_id", mountId + "");
+//        params.put("filename", fileName + "");
+//        params.put("filehash", fileHash + "");
+//        params.put("filesize", fileSize + "");
+//        params.put("target_mount_id", targetMountId + "");
+//        params.put("target_fullpath", targetFullPath + "");
+//        params.put("sign", generateSign(params));
+//        String url = URL_API + URL_API_FILE_SAVE;
+//        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).setCheckAuth(true).executeSync();
+//    }
+
     /**
      * 文件转存
+     */
+    public String fileSave(int mountId, String fileName, String fileHash, long fileSize, int targetMountId, String targetFullPath) {
+
+        return fileSave(mountId, "", fileName, fileHash, fileSize, targetMountId, targetFullPath, null);
+    }
+
+    /**
+     * 文件（夹）转存
      *
      * @param mountId
+     * @param fullPath
      * @param fileName
      * @param fileHash
      * @param fileSize
      * @param targetMountId
      * @param targetFullPath
+     * @param dialogId
+     * @return
      */
-    public String fileSave(int mountId, String fileName, String fileHash, long fileSize, int targetMountId, String targetFullPath) {
+    public String fileSave(int mountId, String fullPath, String fileName, String fileHash, long fileSize,
+                           int targetMountId, String targetFullPath, String dialogId) {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("mount_id", mountId + "");
-        params.put("filename", fileName + "");
-        params.put("filehash", fileHash + "");
+        params.put("filename", fileName);
+        params.put("fullpath", fullPath);
+        params.put("filehash", fileHash);
         params.put("filesize", fileSize + "");
         params.put("target_mount_id", targetMountId + "");
-        params.put("target_fullpath", targetFullPath + "");
+        params.put("target_fullpath", targetFullPath);
+        params.put("dialog_id", dialogId);
         params.put("sign", generateSign(params));
-        String url = URL_API + URL_API_FILE_SAVE;
+        String url = URL_API + URL_API_GET_FILE_SAVE;
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).setCheckAuth(true).executeSync();
     }
 
