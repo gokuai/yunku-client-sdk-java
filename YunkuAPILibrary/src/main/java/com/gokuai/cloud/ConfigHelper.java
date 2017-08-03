@@ -140,7 +140,7 @@ public class ConfigHelper {
 
         //TODO 设置代理
         if (!(mProxy == null)){
-            NetConnection.proxy = mProxy;
+            NetConnection.setProxy(mProxy);
         }
     }
 }

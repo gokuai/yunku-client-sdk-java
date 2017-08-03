@@ -29,7 +29,7 @@ Robots: noindex,nofollow
 
 ```groovy
 	dependencies {
-	        compile 'com.github.gokuai.yunku-client-sdk-java:YunkuAPILibrary:3.5'
+	        compile 'com.github.gokuai.yunku-client-sdk-java:YunkuAPILibrary:3.6'
 	}
 ```
 或者Maven：
@@ -47,7 +47,7 @@ Robots: noindex,nofollow
 	<dependency>
 	    <groupId>com.github.gokuai.yunku-sdk-java</groupId>
 	    <artifactId>YunkuAPILibrary</artifactId>
-	    <version>3.5</version>
+	    <version>3.6</version>
 	</dependency>
 ```
 
