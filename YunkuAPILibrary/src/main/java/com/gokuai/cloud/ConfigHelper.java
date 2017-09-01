@@ -2,7 +2,7 @@ package com.gokuai.cloud;
 
 import com.gokuai.base.DebugConfig;
 import com.gokuai.base.NetConnection;
-import org.apache.http.util.TextUtils;
+import com.gokuai.base.utils.Util;
 
 import java.net.Proxy;
 
@@ -105,13 +105,13 @@ public class ConfigHelper {
 
         // FIXME: 联系够快开发人员获取需要的CLIENT_ID，CLIENT_SECRET 参数
 
-        if (TextUtils.isEmpty(mApiHost)) {
+        if (Util.isEmpty(mApiHost)) {
             YKConfig.URL_API_HOST = "yk3.gokuai.com/m-api";
         } else {
             YKConfig.URL_API_HOST = mApiHost;
         }
 
-        if (TextUtils.isEmpty(mWebHost)) {
+        if (Util.isEmpty(mWebHost)) {
             YKConfig.URL_HOST = "yk3.gokuai.com";
         } else {
             YKConfig.URL_HOST = mWebHost;
@@ -120,7 +120,7 @@ public class ConfigHelper {
         YKConfig.CLIENT_ID = mClientId;
         YKConfig.CLIENT_SECRET = mClientSecret;
 
-        if (TextUtils.isEmpty(YKConfig.CLIENT_ID) || TextUtils.isEmpty(YKConfig.CLIENT_SECRET)) {
+        if (Util.isEmpty(YKConfig.CLIENT_ID) || Util.isEmpty(YKConfig.CLIENT_SECRET)) {
             throw new IllegalArgumentException("CLIENT_ID CLIENT_SECRET can not be empty!!");
         }
 

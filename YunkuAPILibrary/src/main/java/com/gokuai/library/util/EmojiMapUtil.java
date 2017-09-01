@@ -1,6 +1,6 @@
 package com.gokuai.library.util;
 
-import org.apache.http.util.TextUtils;
+import com.gokuai.base.utils.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public final class EmojiMapUtil {
     // matching as foo.su
 
     public static String replaceCheatSheetEmojis(String s) {
-        if (TextUtils.isEmpty(s)) {
+        if (Util.isEmpty(s)) {
             return "";
         }
 
@@ -89,7 +89,7 @@ public final class EmojiMapUtil {
             String toReplace = s.substring(potentialMatch[0], potentialMatch[1]);
             String replacement = CHEAT_SHEET_TO_UNICODE.get(toReplace);
 
-            if (!TextUtils.isEmpty(replacement)) {
+            if (!Util.isEmpty(replacement)) {
                 String newString = s.substring(0, potentialMatch[0]) + replacement;
                 if (potentialMatch[1] <= s.length()) {
                     newString += s.substring(potentialMatch[1]);
@@ -121,7 +121,7 @@ public final class EmojiMapUtil {
      * @return
      */
     public static String replaceUnicodeEmojis(String s) {
-        if (TextUtils.isEmpty(s)) {
+        if (Util.isEmpty(s)) {
             return "";
         }
         for (int i = 0; i < s.length(); i++) {

@@ -11,10 +11,7 @@ import com.gokuai.cloud.transinterface.YKHttpEngine;
 import com.gokuai.cloud.transinterface.YKUtil;
 import com.gokuai.library.data.FileOperationData;
 import okhttp3.*;
-import org.apache.http.HttpStatus;
-import org.apache.http.util.TextUtils;
 import org.json.JSONObject;
-
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
@@ -88,7 +85,7 @@ public class UploadRunnable implements Runnable {
 
             String filehash = "";
             long filesize = 0;
-            if (!TextUtils.isEmpty(mLocalFullPath)) {
+            if (!Util.isEmpty(mLocalFullPath)) {
                 File file = new File(mLocalFullPath);
                 if (!file.exists()) {
                     LogPrint.error(LOG_TAG, "'" + mLocalFullPath + "'  file not exist!");
@@ -117,16 +114,16 @@ public class UploadRunnable implements Runnable {
                         // 服务器上没有，上传文件
                         mServer = data.getServer();
 
-                        if (TextUtils.isEmpty(mServer)) {
+                        if (Util.isEmpty(mServer)) {
                             throw new Exception(" The server is empty ");
                         } else {
                             LogPrint.info(LOG_TAG, "The server is " + mServer);
                         }
 
                         // upload_init
-                        int errorCode = upload_init(data.getHash(), filename, fullpath, filehash, filesize);
+                        int initErrorCode = upload_init(data.getHash(), filename, fullpath, filehash, filesize);
 
-                        if (errorCode == HttpURLConnection.HTTP_OK) {
+                        if (initErrorCode == HttpURLConnection.HTTP_OK) {
                             // upload_part
                             if (mInputStream != null) {
                                 in = mInputStream;
@@ -170,24 +167,24 @@ public class UploadRunnable implements Runnable {
                                 mCallBack.onProgress(mRId, (float) currentLength / (float) filesize);
                                 result = upload_part(range, buffer, (int) datalength, crc32);
                                 code = result.getStatusCode();
-                                if (code == HttpStatus.SC_OK) {
+                                if (code == HttpURLConnection.HTTP_OK) {
                                     // 200
                                     bis.mark(mRangSize);
                                     range_index++;
                                     System.gc();
-                                } else if (code == HttpStatus.SC_ACCEPTED) {
+                                } else if (code == HttpURLConnection.HTTP_ACCEPTED) {
                                     // 202-上传的文件已完成, 可以直接调finish接口
                                     break;
-                                } else if (code >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+                                } else if (code >= HttpURLConnection.HTTP_INTERNAL_ERROR) {
                                     // >=500-服务器错误
                                     upload_server(filesize, filehash, fullpath);
                                     continue;
-                                } else if (code == HttpStatus.SC_UNAUTHORIZED) {
+                                } else if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
                                     // 401-session验证不通过
                                     upload_init(data.getHash(), filename, fullpath,
                                             filehash, filesize);
                                     continue;
-                                } else if (code == HttpStatus.SC_CONFLICT) {
+                                } else if (code == HttpURLConnection.HTTP_CONFLICT) {
                                     // 409-上传块序号错误, http内容中给出服务器期望的块序号
                                     JSONObject json = new JSONObject(result.getResult());
                                     long part_range_start = Long.parseLong(json.optString("expect"));
@@ -202,18 +199,19 @@ public class UploadRunnable implements Runnable {
                             }
                         }
 
+                        int finishErrorCode;
                         // upload_check
                         do {
                             //大文件数据没有存储完毕，需要等一会再检查一遍
-                            errorCode = upload_check();
+                            finishErrorCode = upload_check();
 
-                            if (errorCode == HttpURLConnection.HTTP_OK) {
+                            if (finishErrorCode == HttpURLConnection.HTTP_OK) {
                                 break;
                             }
 
                             Thread.sleep(3000);
 
-                        } while (errorCode == HttpURLConnection.HTTP_ACCEPTED);
+                        } while (finishErrorCode == HttpURLConnection.HTTP_ACCEPTED);
                     }
 
                     // upload_sussec
@@ -233,7 +231,7 @@ public class UploadRunnable implements Runnable {
         } catch (Exception ex) {
             LogPrint.warn(LOG_TAG, ex.getMessage());
 
-            if (!TextUtils.isEmpty(mServer)) {
+            if (!Util.isEmpty(mServer)) {
                 upload_abort();
             }
             if (mCallBack != null) {
