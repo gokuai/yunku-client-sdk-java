@@ -53,7 +53,7 @@ Robots: noindex,nofollow
 
 ## 初始化
 
-要使用云库3.0的API，您需要先在 <a href="http://developer.gokuai.com/yk/tutorial#yk3" target="_blank">企业授权</a> 中获取 `client_id` 和 `client_secret`
+使用云库3.0的用户API，需向你的企业管理员提出开发授权申请, 或联系我们 400-6110-860 以获取调用API的 `client_id` 和 `client_secret`
 
 ## 参数使用
 
