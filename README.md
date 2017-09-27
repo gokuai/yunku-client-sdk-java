@@ -45,7 +45,7 @@ Robots: noindex,nofollow
 
 ```xml
 	<dependency>
-	    <groupId>com.github.gokuai.yunku-sdk-java</groupId>
+	    <groupId>com.github.gokuai.yunku-client-sdk-java</groupId>
 	    <artifactId>YunkuAPILibrary</artifactId>
 	    <version>3.6</version>
 	</dependency>
