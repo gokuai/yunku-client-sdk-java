@@ -3052,3 +3052,14 @@ list的数据结构
 **方案3:** 如果使用的是 Apache Tomatcat，在 Java Options 上，添加 -Dfile.encoding=utf-8 即可。
 
 <img src=https://repo.gokuai.cn/app/ImageResourceForMD/raw/master/YunkuJavaSDK/encoding.png alt="Apache Tomatcat" title="Apache Tomatcat" width="50%" height="50%" />  
+
+### 语言问题
+#### 现象
+* 传入中文字段返回英文字段
+
+#### 解决办法
+* 更改接口的语言环境，代码如下
+```
+	Locale locale = new Locale("zh-CN");
+	Locale.setDefault(locale);
+```
