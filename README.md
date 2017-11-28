@@ -45,7 +45,7 @@ Robots: noindex,nofollow
 
 ```xml
 	<dependency>
-	    <groupId>com.github.gokuai.yunku-sdk-java</groupId>
+	    <groupId>com.github.gokuai.yunku-client-sdk-java</groupId>
 	    <artifactId>YunkuAPILibrary</artifactId>
 	    <version>3.6</version>
 	</dependency>
@@ -53,7 +53,7 @@ Robots: noindex,nofollow
 
 ## 初始化
 
-要使用云库3.0的API，您需要先在 <a href="http://developer.gokuai.com/yk/tutorial#yk3" target="_blank">企业授权</a> 中获取 `client_id` 和 `client_secret`
+使用云库3.0的用户API，需向你的企业管理员提出开发授权申请, 或联系我们 400-6110-860 以获取调用API的 `client_id` 和 `client_secret`
 
 ## 参数使用
 
@@ -3052,3 +3052,14 @@ list的数据结构
 **方案3:** 如果使用的是 Apache Tomatcat，在 Java Options 上，添加 -Dfile.encoding=utf-8 即可。
 
 <img src=https://repo.gokuai.cn/app/ImageResourceForMD/raw/master/YunkuJavaSDK/encoding.png alt="Apache Tomatcat" title="Apache Tomatcat" width="50%" height="50%" />  
+
+### 语言问题
+#### 现象
+* 传入中文字段返回英文字段
+
+#### 解决办法
+* 更改接口的语言环境，代码如下
+```
+	Locale locale = new Locale("zh-CN");
+	Locale.setDefault(locale);
+```

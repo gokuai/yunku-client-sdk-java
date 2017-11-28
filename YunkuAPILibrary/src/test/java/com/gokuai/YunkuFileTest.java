@@ -324,7 +324,7 @@ public class YunkuFileTest {
 //    @Ignore("uploadByBlock is ignored")
     @Test
     public void uploadByBlock() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(1);
         Assert.assertEquals(true, new File(TEST_FILE_PATH).exists());
         YKHttpEngine.getInstance().uploadByBlock(1221861, "testRangSize.png", TEST_FILE_PATH, 65536, new UploadCallBack() {
             @Override

@@ -13,7 +13,6 @@ import com.gokuai.library.net.UploadRunnable;
 import com.gokuai.library.util.EmojiMapUtil;
 import com.gokuai.library.util.MsMultiPartFormData;
 import com.google.gson.Gson;
-import org.apache.http.util.TextUtils;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -284,7 +283,7 @@ public class YKHttpEngine extends HttpEngine {
 
 
     public boolean isTokenAvailable() {
-        return !TextUtils.isEmpty(token);
+        return !Util.isEmpty(token);
     }
 
     private void reSignParams(HashMap<String, String> params, ArrayList<String> ignoreKeys) {
@@ -323,7 +322,7 @@ public class YKHttpEngine extends HttpEngine {
      * 重新获得token
      */
     public boolean refreshToken() {
-        if (TextUtils.isEmpty(refreshToken)) {
+        if (Util.isEmpty(refreshToken)) {
             return false;
         }
         HashMap<String, String> params = new HashMap<>();
@@ -361,21 +360,8 @@ public class YKHttpEngine extends HttpEngine {
      */
     public String loginSync(String account, String password) {
 
-        String url = URL_OAUTH;
-        final HashMap<String, String> params = new HashMap<>();
-        params.put("grant_type", "password");
-        if (!TextUtils.isEmpty(YKConfig.ENT_DOMAIN)) {
-            params.put("username", YKConfig.ENT_DOMAIN + "\\" + account);
-            params.put("password", Base64.encodeBytes(password.getBytes()));
-        } else {
-            params.put("username", account);
-            params.put("password", Util.convert2MD532(password));
-        }
+        String returnString = login(account, password).executeSync();
 
-        params.put("client_id", YKConfig.CLIENT_ID);
-        params.put("sign", generateSign(params));
-
-        String returnString = new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).executeSync();
         ReturnResult returnResult = ReturnResult.create(returnString);
         if (returnResult != null) {
             OauthData data = OauthData.create(returnResult.getResult());
@@ -396,19 +382,30 @@ public class YKHttpEngine extends HttpEngine {
      * @param listener
      * @return
      */
-    public Thread loginAsync(final String account, final String password, final DataListener listener) {
+    public IAsyncTarget loginAsync(final String account, final String password, final DataListener listener) {
 
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                String returnString = loginSync(account, password);
-                if (listener != null) {
-                    listener.onReceivedData(API_ID_LOGIN, returnString, -1);
-                }
-            }
-        };
+        RequestHelper helper = login(account, password);
 
-        return new RequestHelper().executeAsyncTask(thread, listener, API_ID_LOGIN);
+        return helper.executeAsync(listener, API_ID_LOGIN);
+    }
+
+    private RequestHelper login(String account, String password) {
+
+        String url = URL_OAUTH;
+        final HashMap<String, String> params = new HashMap<>();
+        params.put("grant_type", "password");
+        if (!Util.isEmpty(YKConfig.ENT_DOMAIN)) {
+            params.put("username", YKConfig.ENT_DOMAIN + "\\" + account);
+            params.put("password", Base64.encodeBytes(password.getBytes()));
+        } else {
+            params.put("username", account);
+            params.put("password", Util.convert2MD532(password));
+        }
+
+        params.put("client_id", YKConfig.CLIENT_ID);
+        params.put("sign", generateSign(params));
+
+        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST);
     }
 
 
@@ -465,27 +462,6 @@ public class YKHttpEngine extends HttpEngine {
         }
         return returnString;
 
-    }
-
-
-    /**
-     * 获得用户信息
-     *
-     * @param listener
-     */
-    public Thread getAccountInfoAsync(final DataListener listener) {
-
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                String returnString = getAccountInfo();
-                if (listener != null) {
-                    listener.onReceivedData(API_ID_ACCOUNT_INFO, returnString, -1);
-                }
-            }
-        };
-
-        return new RequestHelper().executeAsyncTask(thread, listener, API_ID_ACCOUNT_INFO);
     }
 
     /**
@@ -545,39 +521,28 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 获得用户信息
      *
+     * @param listener
+     */
+    public IAsyncTarget getAccountInfoAsync(final DataListener listener) {
+
+        return getAccountInfoHelper().executeAsync(listener, API_ID_ACCOUNT_INFO);
+    }
+
+    /**
+     * 获得用户信息
+     *
      * @return
      */
     public String getAccountInfo() {
+        return getAccountInfoHelper().executeSync();
+    }
+
+    private RequestHelper getAccountInfoHelper() {
         String url = URL_API + URL_API_GET_ACCOUNT_INFO;
         final HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("sign", generateSign(params));
-        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
-    }
-
-    /**
-     * 新建文件、文件夹
-     *
-     * @param mountId  文件柜id
-     * @param fullpath 文件路径
-     * @param filehash 文件hash
-     * @param filesize 文件大小
-     * @param listener
-     */
-    public Thread addFileAsync(final int mountId, final String fullpath, final String filehash,
-                               final long filesize, final DataListener listener) {
-
-        Thread task = new Thread() {
-            @Override
-            public void run() {
-                String result = addLibraryFile(mountId, fullpath, filehash, filesize);
-                if (listener != null) {
-                    listener.onReceivedData(API_ID_FILEADD, result, -1);
-                }
-            }
-        };
-
-        return new RequestHelper().executeAsyncTask(task, listener, API_ID_FILEADD);
+        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true);
     }
 
     /**
@@ -710,7 +675,7 @@ public class YKHttpEngine extends HttpEngine {
      * @return
      */
 
-    public Thread getContactMemberGroups(final int entId, final int memberId, final DataListener listener) {
+    public IAsyncTarget getContactMemberGroups(final int entId, final int memberId, final DataListener listener) {
 
 
         String url = URL_API + URL_API_CONTACT_MEMBER_GROUPS;
@@ -820,8 +785,8 @@ public class YKHttpEngine extends HttpEngine {
      * @return
      */
 
-    public Thread searchContactMembers(final int entId, final int start, final String keyWord,
-                                       final int size, final DataListener listener) {
+    public IAsyncTarget searchContactMembers(final int entId, final int start, final String keyWord,
+                                             final int size, final DataListener listener) {
 
         String url = URL_API + URL_API_ENT_MEMBER_LIST;
         HashMap<String, String> params = new HashMap<>();
@@ -940,8 +905,8 @@ public class YKHttpEngine extends HttpEngine {
      * @return
      */
 
-    public Thread getMemberRelative(final int orgId, final boolean withInfo,
-                                    final boolean withGroup, final DataListener listener) {
+    public IAsyncTarget getMemberRelative(final int orgId, final boolean withInfo,
+                                          final boolean withGroup, final DataListener listener) {
 
         String url = URL_API + URL_API_LIBRARY_MEMBERS;
         HashMap<String, String> params = new HashMap<>();
@@ -986,7 +951,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param withInfo
      * @return
      */
-    public Thread getGroupRelative(final int orgId, final boolean withInfo, final DataListener listener) {
+    public IAsyncTarget getGroupRelative(final int orgId, final boolean withInfo, final DataListener listener) {
         String url = URL_API + URL_API_LIBRARY_GROUPS;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
@@ -1011,7 +976,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param listener
      * @param orgId
      */
-    public Thread quitLib(final DataListener listener, final int orgId) {
+    public IAsyncTarget quitLib(final DataListener listener, final int orgId) {
 
         String url = URL_API + URL_API_QUIT_LIB;
         HashMap<String, String> params = new HashMap<>();
@@ -1038,7 +1003,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param orgId
      * @return
      */
-    public Thread deleteLib(final DataListener listener, final int orgId) {
+    public IAsyncTarget deleteLib(final DataListener listener, final int orgId) {
 
         String url = URL_API + URL_API_DEL_LIB;
         HashMap<String, String> params = new HashMap<>();
@@ -1147,7 +1112,7 @@ public class YKHttpEngine extends HttpEngine {
      * 获取存储点列表
      */
 
-    public Thread getStoragePoint(final DataListener listener, final int endId) {
+    public IAsyncTarget getStoragePoint(final DataListener listener, final int endId) {
 
         String url = URL_API + URL_API_GET_LIB_STORAGE_POINT;
         HashMap<String, String> params = new HashMap<>();
@@ -1340,7 +1305,7 @@ public class YKHttpEngine extends HttpEngine {
      * @return
      */
 
-    public Thread changeLibraryMemberState(final int orgId, final String memberids, final int state, final DataListener listener) {
+    public IAsyncTarget changeLibraryMemberState(final int orgId, final String memberids, final int state, final DataListener listener) {
 
         String url = URL_API + URL_API_UPDATE_LIB_MEMBER;
         HashMap<String, String> params = new HashMap<>();
@@ -1499,8 +1464,8 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 改变团队图标操作
      */
-    public Thread changeCLoudLogo(final DataListener listener,
-                                  final int orgId, final String logoUrl) {
+    public IAsyncTarget changeCLoudLogo(final DataListener listener,
+                                        final int orgId, final String logoUrl) {
 
         String url = URL_API + URL_API_UPDATE_LIB_INFO;
         HashMap<String, String> params = new HashMap<>();
@@ -1524,8 +1489,8 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 改变团队名称操作
      */
-    public Thread changeOrgName(final DataListener listener,
-                                final int orgId, final String name) {
+    public IAsyncTarget changeOrgName(final DataListener listener,
+                                      final int orgId, final String name) {
 
         String url = URL_API + URL_API_UPDATE_LIB_INFO;
         HashMap<String, String> params = new HashMap<>();
@@ -1547,8 +1512,8 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 改变团队描述操作
      */
-    public Thread changeCLoudDesc(final DataListener listener,
-                                  final int orgId, final String desc) {
+    public IAsyncTarget changeCLoudDesc(final DataListener listener,
+                                        final int orgId, final String desc) {
 
         String url = URL_API + URL_API_UPDATE_LIB_INFO;
         HashMap<String, String> params = new HashMap<>();
@@ -1572,8 +1537,8 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 改变团队空间大小操作
      */
-    public Thread changeCLoudSpace(final DataListener listener,
-                                   final int orgId, final int capacity) {
+    public IAsyncTarget changeCLoudSpace(final DataListener listener,
+                                         final int orgId, final int capacity) {
 
         String url = URL_API + URL_API_UPDATE_LIB_INFO;
         HashMap<String, String> params = new HashMap<>();
@@ -1596,9 +1561,9 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 更新通讯录中成员信息
      */
-    public Thread updateContactMember(final int entId, final String memberIds,
-                                      final String groupIds, final int enablePublishNotice,
-                                      final int enableCreateOrg, final String memberPhone, final DataListener listener) {
+    public IAsyncTarget updateContactMember(final int entId, final String memberIds,
+                                            final String groupIds, final int enablePublishNotice,
+                                            final int enableCreateOrg, final String memberPhone, final DataListener listener) {
 
         String url = URL_API + URL_API_UPDATE_CONTACT_MEMBER;
         HashMap<String, String> params = new HashMap<>();
@@ -1631,7 +1596,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param listener
      * @return
      */
-    public Thread updateContactMemberState(final int entId, final String memberIds, final int state, final DataListener listener) {
+    public IAsyncTarget updateContactMemberState(final int entId, final String memberIds, final int state, final DataListener listener) {
         String url = URL_API + URL_API_UPDATE_CONTACT_MEMBER;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
@@ -1661,7 +1626,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param listener
      * @return
      */
-    public Thread addGroupMember(final int entId, final int groupId, final String memberIds, final DataListener listener) {
+    public IAsyncTarget addGroupMember(final int entId, final int groupId, final String memberIds, final DataListener listener) {
         String url = URL_API + URL_API_ADD_GROUP_MEMBER;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
@@ -1691,7 +1656,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param listener
      * @return
      */
-    public Thread removeGroupMember(final int entId, final int groupId, final String memberIds, final DataListener listener) {
+    public IAsyncTarget removeGroupMember(final int entId, final int groupId, final String memberIds, final DataListener listener) {
         String url = URL_API + URL_API_REMOVE_GROUP_MEMBER;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
@@ -1715,8 +1680,8 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 改变通讯录中部门名字
      */
-    public Thread changeContactGroupName(final int entId, final int groupId,
-                                         final String name, final DataListener listener) {
+    public IAsyncTarget changeContactGroupName(final int entId, final int groupId,
+                                               final String name, final DataListener listener) {
 
         String url = URL_API + URL_API_UPDATE_CONTACT_GROUP;
         HashMap<String, String> params = new HashMap<>();
@@ -1739,7 +1704,7 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 删除通讯录的部门
      */
-    public Thread delContactGroup(final int entId, final int groupId, final DataListener listener) {
+    public IAsyncTarget delContactGroup(final int entId, final int groupId, final DataListener listener) {
 
         String url = URL_API + URL_API_DEL_CONTACT_GROUP;
         HashMap<String, String> params = new HashMap<>();
@@ -1762,7 +1727,7 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 添加通讯录部门
      */
-    public Thread addContactGroup(final int entId, final int groupId, final String name, final DataListener listener) {
+    public IAsyncTarget addContactGroup(final int entId, final int groupId, final String name, final DataListener listener) {
 
         String url = URL_API + URL_API_ADD_CONTACT_GROUP;
         HashMap<String, String> params = new HashMap<>();
@@ -1786,8 +1751,8 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 添加通讯录成员
      */
-    public Thread addContactMember(final int entId, final String name, final String groupId, final String email,
-                                   final String phone, final String password, final int publishNotice, final int createOrg, final DataListener listener) {
+    public IAsyncTarget addContactMember(final int entId, final String name, final String groupId, final String email,
+                                         final String phone, final String password, final int publishNotice, final int createOrg, final DataListener listener) {
 
         String url = URL_API + URL_API_ADD_CONTACT_MEMBER;
         HashMap<String, String> params = new HashMap<>();
@@ -1822,7 +1787,7 @@ public class YKHttpEngine extends HttpEngine {
      * @return
      */
 
-    public Thread checkExistMember(final int entId, final String memberEmail, final DataListener listener) {
+    public IAsyncTarget checkExistMember(final int entId, final String memberEmail, final DataListener listener) {
 
         String url = URL_API + URL_API_CONTACT_CHECK_EXIST_MEMBER;
         HashMap<String, String> params = new HashMap<>();
@@ -1845,7 +1810,7 @@ public class YKHttpEngine extends HttpEngine {
     /**
      * 删除通讯录成员
      */
-    public Thread delContactMember(final int entId, final String removeMemberIds, final int transferMemberId, final DataListener listener) {
+    public IAsyncTarget delContactMember(final int entId, final String removeMemberIds, final int transferMemberId, final DataListener listener) {
 
 
         String url = URL_API + URL_API_DEL_CONTACT_MEMBER;
@@ -1871,8 +1836,8 @@ public class YKHttpEngine extends HttpEngine {
      * 添加快捷方式
      */
 
-    public Thread addShortCuts(final DataListener listener,
-                               final int value, final int type) {
+    public IAsyncTarget addShortCuts(final DataListener listener,
+                                     final int value, final int type) {
 
         String url = URL_API + URL_API_ADD_SHORTCUT;
         HashMap<String, String> params = new HashMap<>();
@@ -1896,8 +1861,8 @@ public class YKHttpEngine extends HttpEngine {
      * 删除快捷方式
      */
 
-    public Thread delShortCuts(final DataListener listener,
-                               final int value, final int type) {
+    public IAsyncTarget delShortCuts(final DataListener listener,
+                                     final int value, final int type) {
 
         String url = URL_API + URL_API_DEL_SHORTCUT;
         HashMap<String, String> params = new HashMap<>();
@@ -1925,7 +1890,7 @@ public class YKHttpEngine extends HttpEngine {
         String url = URL_API + URL_API_GET_SERVER_SITE;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
-        if (!TextUtils.isEmpty(storagePoint)) {
+        if (!Util.isEmpty(storagePoint)) {
             params.put("storage_point", storagePoint);
         }
         params.put("type", type);
@@ -1949,7 +1914,7 @@ public class YKHttpEngine extends HttpEngine {
 
 
     //更改用户显示名
-    public Thread uploadUserName(final DataListener listener, final String name) {
+    public IAsyncTarget uploadUserName(final DataListener listener, final String name) {
 
         String url = URL_API + URL_API_SET_INFO;
         HashMap<String, String> params = new HashMap<>();
@@ -1975,7 +1940,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param mobile
      * @return
      */
-    public Thread uploadUserPhone(final DataListener listener, final String mobile) {
+    public IAsyncTarget uploadUserPhone(final DataListener listener, final String mobile) {
 
         String url = URL_API + URL_API_SET_INFO;
         HashMap<String, String> params = new HashMap<>();
@@ -2002,7 +1967,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param info
      * @return
      */
-    public Thread setDeviceInfo(final DataListener listener, final String device, final String info) {
+    public IAsyncTarget setDeviceInfo(final DataListener listener, final String device, final String info) {
 
         String url = URL_API + URL_API_SET_DEVICE;
         HashMap<String, String> params = new HashMap<>();
@@ -2030,7 +1995,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param state
      * @return
      */
-    public Thread changeDeviceState(final DataListener listener, final int deviceId, final int state) {
+    public IAsyncTarget changeDeviceState(final DataListener listener, final int deviceId, final int state) {
 
         String url = URL_API + URL_API_CHANGE_DEVICE_STATE;
         HashMap<String, String> params = new HashMap<>();
@@ -2057,7 +2022,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param deviceId
      * @return
      */
-    public Thread delDevice(final DataListener listener, final int deviceId) {
+    public IAsyncTarget delDevice(final DataListener listener, final int deviceId) {
 
         String url = URL_API + URL_API_DEL_DEVICE;
         HashMap<String, String> params = new HashMap<>();
@@ -2083,7 +2048,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param state
      * @return
      */
-    public Thread changeNewDeviceState(final DataListener listener, final int state) {
+    public IAsyncTarget changeNewDeviceState(final DataListener listener, final int state) {
 
         String url = URL_API + URL_API_DISABLE_NEW_DEVICE;
         HashMap<String, String> params = new HashMap<>();
@@ -2110,7 +2075,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param password
      * @return
      */
-    public Thread registerAsync(final DataListener listener, final String name, final String email, final String password) {
+    public IAsyncTarget registerAsync(final DataListener listener, final String name, final String email, final String password) {
 
         String url = URL_API + URL_API_REGISTER;
         HashMap<String, String> params = new HashMap<>();
@@ -2139,7 +2104,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param email
      * @return
      */
-    public Thread findPassword(final DataListener listener, final String email) {
+    public IAsyncTarget findPassword(final DataListener listener, final String email) {
 
         String url = URL_API + URL_API_FIND_PASSWORD;
         HashMap<String, String> params = new HashMap<>();
@@ -2319,21 +2284,11 @@ public class YKHttpEngine extends HttpEngine {
      * @param listener
      * @return
      */
-    public Thread lock(final String fullPath, final int mountId, final int lock, final DataListener listener) {
+    public IAsyncTarget lock(final String fullPath, final int mountId, final int lock, final DataListener listener) {
 
+        RequestHelper requestHelper = lockHelper(fullPath, mountId, lock);
 
-        Thread task = new Thread() {
-            @Override
-            public void run() {
-                String result = lock(fullPath, mountId, lock);
-                if (listener != null) {
-                    listener.onReceivedData(API_ID_LOCK, result, -1);
-                }
-            }
-        };
-
-
-        return new RequestHelper().executeAsyncTask(task, listener, API_ID_LOCK);
+        return requestHelper.executeAsync(listener, API_ID_LOCK);
 
     }
 
@@ -2347,6 +2302,12 @@ public class YKHttpEngine extends HttpEngine {
      */
     public String lock(final String fullPath, final int mountId, int lock) {
 
+        RequestHelper requestHelper = lockHelper(fullPath, mountId, lock);
+
+        return requestHelper.executeSync();
+    }
+
+    private RequestHelper lockHelper(final String fullPath, final int mountId, int lock) {
 
         String url = URL_API + URL_API_LOCK;
         HashMap<String, String> params = new HashMap<>();
@@ -2355,31 +2316,11 @@ public class YKHttpEngine extends HttpEngine {
         params.put("lock", (lock == 0 ? "unlock" : "lock"));
         params.put("token", getToken());
         params.put("sign", generateSign(params));
-        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).setCheckAuth(true).executeSync();
+
+        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.POST).setCheckAuth(true);
     }
 
-    /**
-     * 根据文件hash获取mountId
-     *
-     * @param mountId
-     * @param hash
-     * @param listener
-     * @return
-     */
-    public Thread getFileInfoByHash(final int mountId, final String hash, final DataListener listener) {
 
-        Thread task = new Thread() {
-            @Override
-            public void run() {
-                String result = getFileInfoByHash(hash, mountId);
-                if (listener != null) {
-                    listener.onReceivedData(API_ID_GET_FILE_INFO, result, -1);
-                }
-            }
-        };
-
-        return new RequestHelper().executeAsyncTask(task, listener, API_ID_GET_FILE_INFO);
-    }
 
 
     /**
@@ -2460,10 +2401,10 @@ public class YKHttpEngine extends HttpEngine {
         String url = URL_API_EXCHANGE_TOKEN;
         final HashMap<String, String> params = new HashMap<>();
         params.put("grant_type", "exchange_token");
-        if (!TextUtils.isEmpty(exchangeToken)) {
+        if (!Util.isEmpty(exchangeToken)) {
             params.put("exchange_token", exchangeToken);
         }
-        if (!TextUtils.isEmpty(username) && !TextUtils.isEmpty(password)) {
+        if (!Util.isEmpty(username) && !Util.isEmpty(password)) {
             params.put("username", username);
             params.put("password", Base64.encodeBytes(password.getBytes()));
         }
@@ -2556,7 +2497,7 @@ public class YKHttpEngine extends HttpEngine {
      * @return
      */
 
-    public Thread getLastVisitFile(final DataListener listener, final int size) {
+    public IAsyncTarget getLastVisitFile(final DataListener listener, final int size) {
 
         String url = URL_API + URL_API_MEMBER_LAST_VISIT;
         HashMap<String, String> params = new HashMap<>();
@@ -2634,19 +2575,11 @@ public class YKHttpEngine extends HttpEngine {
      * @param listener
      * @return
      */
-    public Thread getMemberInfo(final int entId, final int memberId, final DataListener listener) {
+    public IAsyncTarget getMemberInfoAsync(final int entId, final int memberId, final DataListener listener) {
 
-        Thread task = new Thread() {
-            @Override
-            public void run() {
-                String result = getMemberInfo(entId, memberId);
-                if (listener != null) {
-                    listener.onReceivedData(API_ID_CONTACT_MEMBER_INFO, result, -1);
-                }
-            }
-        };
+        RequestHelper memberInfoHelper = getMemberInfoHelper(entId, memberId);
 
-        return new RequestHelper().executeAsyncTask(task, listener, API_ID_CONTACT_MEMBER_INFO);
+        return memberInfoHelper.executeAsync(listener, API_ID_CONTACT_MEMBER_INFO);
 
     }
 
@@ -2658,13 +2591,21 @@ public class YKHttpEngine extends HttpEngine {
      * @return
      */
     public String getMemberInfo(int entId, int memberId) {
+
+        RequestHelper memberInfoHelper = getMemberInfoHelper(entId, memberId);
+        return memberInfoHelper.executeSync();
+    }
+
+    private RequestHelper getMemberInfoHelper(int entId, int memberId) {
+
         String url = URL_API + URL_API_CONTACT_MEMBER_INFO;
         final HashMap<String, String> params = new HashMap<>();
         params.put("ent_id", entId + "");
         params.put("_member_id", memberId + "");
         params.put("token", getToken());
         params.put("sign", generateSign(params));
-        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
+
+        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true);
     }
 
 
@@ -2679,7 +2620,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param listener
      * @return
      */
-    public Thread createOffline(int mountId, String path, String fileName, String downloadUrl, String token, final DataListener listener) {
+    public IAsyncTarget createOffline(int mountId, String path, String fileName, String downloadUrl, String token, final DataListener listener) {
 
 
         String url = URL_API + URL_API_CREATE_OFFLINE;
@@ -2688,7 +2629,7 @@ public class YKHttpEngine extends HttpEngine {
         params.put("path", path);
         params.put("filename", fileName);
         params.put("url", downloadUrl);
-        params.put("token", TextUtils.isEmpty(token) ? getToken() : token);
+        params.put("token", Util.isEmpty(token) ? getToken() : token);
         params.put("sign", generateSign(params));
 
         return new RequestHelper().setParams(params)
@@ -2729,7 +2670,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param listener
      * @return
      */
-    public Thread getMemberIdFromOutId(final int[] outIds, final int entId, final DataListener listener) {
+    public IAsyncTarget getMemberIdFromOutId(final int[] outIds, final int entId, final DataListener listener) {
 
 
         final String url = URL_API + URL_API_OUT_ID_TO_MEMBER_ID;
@@ -2752,39 +2693,39 @@ public class YKHttpEngine extends HttpEngine {
     }
 
     /**
+     * memberId 转  outId
+     *
+     * @return
+     */
+    public IAsyncTarget getOutIdFromMemberIdAsync(final int[] memberIds, final int entId, final DataListener listener) {
+
+        RequestHelper outIdFromMemberIdHelper = getOutIdFromMemberIdHelper(memberIds, entId);
+
+        return outIdFromMemberIdHelper.executeAsync(listener, API_ID_MEMBER_ID_TO_OUT_ID);
+    }
+
+    /**
      * memberId 转 outId 同步方法
      *
      * @return
      */
     public String getOutIdFromMemberIdSync(int[] memberIds, int entId) {
+
+        RequestHelper outIdFromMemberIdHelper = getOutIdFromMemberIdHelper(memberIds, entId);
+
+        return outIdFromMemberIdHelper.executeSync();
+    }
+
+    private RequestHelper getOutIdFromMemberIdHelper(int[] memberIds, int entId) {
+
         String url = URL_API + URL_API_MEMBER_ID_TO_OUT_ID;
         HashMap<String, String> params = new HashMap<>();
-        params.put("token", TextUtils.isEmpty(token) ? getToken() : token);
+        params.put("token", Util.isEmpty(token) ? getToken() : token);
         params.put("ent_id", entId + "");
         params.put("_member_ids", Util.intArrayToString(memberIds, ","));
         params.put("sign", generateSign(params));
-        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
-    }
 
-
-    /**
-     * memberId 转  outId
-     *
-     * @return
-     */
-    public Thread getOutIdFromMemberId(final int[] memberIds, final int entId, final DataListener listener) {
-
-        Thread task = new Thread() {
-            @Override
-            public void run() {
-                String result = getOutIdFromMemberIdSync(memberIds, entId);
-                if (listener != null) {
-                    listener.onReceivedData(API_ID_MEMBER_ID_TO_OUT_ID, result, -1);
-                }
-            }
-        };
-
-        return new RequestHelper().executeAsyncTask(task, listener, API_ID_MEMBER_ID_TO_OUT_ID);
+        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true);
     }
 
 
@@ -2837,7 +2778,7 @@ public class YKHttpEngine extends HttpEngine {
      * @param listener
      * @return
      */
-    public Thread getUrlByFileHash(final int mountId, final String fileHash, final String net, final boolean isOpen, final DataListener listener) {
+    public IAsyncTarget getUrlByFileHash(final int mountId, final String fileHash, final String net, final boolean isOpen, final DataListener listener) {
 
         String url = URL_API + URL_API_GET_URL_BY_FILEHASH;
         HashMap<String, String> params = new HashMap<>();
@@ -2900,6 +2841,20 @@ public class YKHttpEngine extends HttpEngine {
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
 
+    /**
+     * 根据文件hash获取mountId
+     *
+     * @param mountId
+     * @param hash
+     * @param listener
+     * @return
+     */
+    public IAsyncTarget getFileInfoByHashAsync(final int mountId, final String hash, final DataListener listener) {
+
+        RequestHelper fileInfoByHashHelper = getFileInfoByHashHelper(hash, mountId);
+
+        return fileInfoByHashHelper.executeAsync(listener, API_ID_GET_FILE_INFO);
+    }
 
     /**
      * 根据hash获取文件信息
@@ -2910,6 +2865,14 @@ public class YKHttpEngine extends HttpEngine {
      */
     public String getFileInfoByHash(String hash, int mountId) {
 
+        RequestHelper fileInfoByHashHelper = getFileInfoByHashHelper(hash, mountId);
+
+        return fileInfoByHashHelper.executeSync();
+    }
+
+    private RequestHelper getFileInfoByHashHelper(String hash, int mountId) {
+
+        String url = URL_API + URL_API_GET_FILE_INFO;
 
         final HashMap<String, String> params = new HashMap<>();
         params.put("mount_id", String.valueOf(mountId));
@@ -2917,28 +2880,54 @@ public class YKHttpEngine extends HttpEngine {
         params.put("token", getToken());
         params.put("sign", generateSign(params));
 
-
-        String url = URL_API + URL_API_GET_FILE_INFO;
-
-        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
+        return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true);
     }
-
 
     /**
      * 新建文件、文件夹
      *
-     * @param mountId  文件柜id
-     * @param fullpath 文件路径
-     * @param filehash 文件hash
-     * @param filesize 文件大小
+     * @param mountId
+     * @param fullPath
+     * @param fileHash
+     * @param fileSize
+     * @param listener
+     * @return
      */
-    public String addFile(int mountId, String fullpath, String filehash, long filesize) {
+    public IAsyncTarget addFileAsync(final int mountId, final String fullPath, final String fileHash,
+                                     final long fileSize, final DataListener listener) {
+
+        RequestHelper requestHelper = addFileHelper(mountId, fullPath, fileHash, fileSize);
+
+        return requestHelper.executeAsync(listener, API_ID_FILEADD);
+    }
+
+    /**
+     * 新建文件、文件夹
+     *
+     * @param mountId
+     * @param fullPath
+     * @param fileHash
+     * @param fileSize
+     * @return
+     */
+    public String addFile(int mountId, String fullPath, String fileHash, long fileSize) {
+
+        RequestHelper requestHelper = addFileHelper(mountId, fullPath, fileHash, fileSize);
+
+        return requestHelper.executeSync();
+
+    }
+
+    public RequestHelper addFileHelper(int mountId, String fullPath, String fileHash, long fileSize) {
+
+        String url = URL_API + URL_API_CREATE_FILE;
+
         HashMap<String, String> params = new HashMap<>();
         params.put("mount_id", String.valueOf(mountId));
 
-        params.put("fullpath", fullpath);
-        params.put("filehash", filehash);
-        params.put("filesize", String.valueOf(filesize));
+        params.put("fullpath", fullPath);
+        params.put("filehash", fileHash);
+        params.put("filesize", String.valueOf(fileSize));
         params.put("token", getToken());
 
         ArrayList<String> ignoreKeys = new ArrayList<>();
@@ -2947,28 +2936,37 @@ public class YKHttpEngine extends HttpEngine {
 
         params.put("sign", generateSign(params, ignoreKeys));
 
-        String url = URL_API + URL_API_CREATE_FILE;
-
         return new RequestHelper().setParams(params)
                 .setUrl(url)
                 .setMethod(RequestMethod.POST)
                 .setCheckAuth(true)
-                .setIgnoreKeys(ignoreKeys)
-                .executeSync();
+                .setIgnoreKeys(ignoreKeys);
+    }
 
+    /**
+     * 添加库文件
+     *
+     * @param mountId
+     * @param fullPath
+     * @param fileHash
+     * @param fileSize
+     * @return
+     */
+    public String addLibraryFile(int mountId, String fullPath, String fileHash, long fileSize) {
+        return addFile(mountId, fullPath, fileHash, fileSize);
     }
 
     /**
      * 创建文件夹
      *
      * @param mountId
-     * @param fullpath
+     * @param fullPath
      * @return
      */
-    public String createFolder(int mountId, String fullpath) {
+    public String createFolder(int mountId, String fullPath) {
         HashMap<String, String> params = new HashMap<>();
         params.put("mount_id", String.valueOf(mountId));
-        params.put("fullpath", fullpath);
+        params.put("fullpath", fullPath);
         params.put("token", getToken());
         params.put("sign", generateSign(params));
         String url = URL_API + URL_API_CREATE_FOLDER;
@@ -2977,20 +2975,6 @@ public class YKHttpEngine extends HttpEngine {
                 .setMethod(RequestMethod.POST)
                 .setCheckAuth(true)
                 .executeSync();
-    }
-
-
-    /**
-     * 添加库文件
-     *
-     * @param mountId
-     * @param fullpath
-     * @param filehash
-     * @param filesize
-     * @return
-     */
-    public String addLibraryFile(int mountId, String fullpath, String filehash, long filesize) {
-        return addFile(mountId, fullpath, filehash, filesize);
     }
 
     /**
@@ -3272,134 +3256,6 @@ public class YKHttpEngine extends HttpEngine {
             }
         }
         return returnString;
-    }
-
-
-    /**
-     * 请求协助类
-     */
-    protected class RequestHelper {
-        RequestMethod method;
-        HashMap<String, String> params;
-        HashMap<String, String> headParams;
-        String url;
-        boolean checkAuth;
-
-        ArrayList<String> ignoreKeys;
-
-        RequestHelper setMethod(RequestMethod method) {
-            this.method = method;
-            return this;
-        }
-
-        RequestHelper setParams(HashMap<String, String> params) {
-            this.params = params;
-            return this;
-        }
-
-        RequestHelper setHeadParams(HashMap<String, String> headParams) {
-            this.headParams = headParams;
-            return this;
-        }
-
-        RequestHelper setCheckAuth(boolean checkAuth) {
-            this.checkAuth = checkAuth;
-            return this;
-        }
-
-        RequestHelper setUrl(String url) {
-            this.url = url;
-            return this;
-        }
-
-        public RequestHelper setIgnoreKeys(ArrayList<String> ignoreKeys) {
-            this.ignoreKeys = ignoreKeys;
-            return this;
-        }
-
-        /**
-         * 同步执行
-         *
-         * @return
-         */
-        String executeSync() {
-            checkNecessaryParams(url, method);
-
-            if (!Util.isNetworkAvailableEx()) {
-                return "";
-            }
-
-            if (checkAuth) {
-                return sendRequestWithAuth(url, method, params, headParams, ignoreKeys);
-            }
-            return NetConnection.sendRequest(url, method, params, headParams);
-        }
-
-        /**
-         * 异步执行
-         *
-         * @return
-         */
-        Thread executeAsync(final DataListener listener, final int apiId, final RequestHelperCallBack callBack) {
-
-            checkNecessaryParams(url, method);
-
-            if (listener != null) {
-                if (!Util.isNetworkAvailableEx()) {
-                    listener.onReceivedData(apiId, null, ERRORID_NETDISCONNECT);
-                    return null;
-                }
-            }
-
-            Thread thread = new Thread() {
-                @Override
-                public void run() {
-                    String returnString;
-
-                    if (checkAuth) {
-                        returnString = sendRequestWithAuth(url, method, params, headParams, ignoreKeys);
-                    } else {
-                        returnString = NetConnection.sendRequest(url, method, params, headParams);
-                    }
-
-                    if (callBack != null) {
-                        if (listener != null) {
-                            Object object = callBack.getReturnData(returnString);
-                            listener.onReceivedData(apiId, object, -1);
-                        }
-                    }
-                }
-            };
-            thread.start();
-            return thread;
-        }
-
-        private void checkNecessaryParams(String url, RequestMethod method) {
-            if (TextUtils.isEmpty(url)) {
-                throw new IllegalArgumentException("url must not be null");
-            }
-
-            if (method == null) {
-                throw new IllegalArgumentException("method must not be null");
-            }
-        }
-
-        Thread executeAsyncTask(Thread task, final DataListener listener, final int apiId) {
-            if (listener != null) {
-                if (!Util.isNetworkAvailableEx()) {
-                    listener.onReceivedData(apiId, null, ERRORID_NETDISCONNECT);
-                    return null;
-                }
-            }
-
-            task.start();
-            return task;
-        }
-
-    }
-
-    interface RequestHelperCallBack {
-        Object getReturnData(String returnString);
     }
 
 }
