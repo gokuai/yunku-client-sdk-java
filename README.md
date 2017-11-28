@@ -1,17 +1,10 @@
-/*
-Title:够快云库 Client SDK 使用说明
-Description:
-Author: Brandon
-Date: 2016/10/12
-Robots: noindex,nofollow
-*/
-
 # 够快云库3.0 Client SDK 使用说明
 
 [![](https://jitpack.io/v/gokuai/yunku-client-sdk-java.svg)](https://jitpack.io/#gokuai/yunku-client-sdk-java)
 
-* 版本：3.0
-* 创建：2016-10-12
+##兼容
+* Java 7 或者更高
+* 支持 Android 系统
 
 ## 引用
 将`[yunku-client-sdk-java].jar`文件引用进项目，或者将`YunkuAPILibrary`做为依赖项目。
@@ -29,7 +22,7 @@ Robots: noindex,nofollow
 
 ```groovy
 	dependencies {
-	        compile 'com.github.gokuai.yunku-client-sdk-java:YunkuAPILibrary:3.6'
+	        compile 'com.github.gokuai.yunku-client-sdk-java:YunkuAPILibrary:3.7'
 	}
 ```
 或者Maven：
@@ -47,7 +40,7 @@ Robots: noindex,nofollow
 	<dependency>
 	    <groupId>com.github.gokuai.yunku-client-sdk-java</groupId>
 	    <artifactId>YunkuAPILibrary</artifactId>
-	    <version>3.6</version>
+	    <version>3.7</version>
 	</dependency>
 ```
 
@@ -59,12 +52,13 @@ Robots: noindex,nofollow
 
 以下使用到的方法中，如果是string类型的非必要参数，如果是不传，则传`null`
 
-# **云库API（YKHttpEngine.java）**
+## **云库API（YKHttpEngine.java）**
 
 ### 构造方法
 	new YKHttpEngine（ClientId, ClientSecret）
 
-#### 参数 
+#### 参数
+
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
 | ClientId | 是 | string | 申请应用时分配的AppKey |

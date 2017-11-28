@@ -44,7 +44,7 @@ public class MsMultiPartFormData {
         httpConn.setDoInput(true);
         httpConn.setRequestProperty("Content-Type",
                 "multipart/form-data; boundary=" + boundary);
-        httpConn.setRequestProperty("User-Agent", NetConnection.USER_AGENT);
+        httpConn.setRequestProperty("User-Agent", NetConnection.getUserAgent());
 //        httpConn.setRequestProperty("Test", "Bonjour");
         outputStream = httpConn.getOutputStream();
         writer = new PrintWriter(new OutputStreamWriter(outputStream, charset),
