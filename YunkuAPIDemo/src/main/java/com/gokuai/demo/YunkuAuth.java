@@ -1,83 +1,75 @@
 package com.gokuai.demo;
 
-import com.gokuai.base.HttpEngine;
-import com.gokuai.base.LogPrint;
 import com.gokuai.base.ReturnResult;
-import com.gokuai.cloud.ConfigHelper;
+import com.gokuai.cloud.data.YunkuException;
 import com.gokuai.cloud.transinterface.YKHttpEngine;
-import com.gokuai.demo.helper.ClientConfig;
-import com.gokuai.demo.helper.DeserializeHelper;
+import com.gokuai.cloud.transinterface.YKUtil;
+import org.json.JSONObject;
 
-/**
- * Created by Brandon on 2016/10/12.
- * <p>
- * 授权认证 Demo示例
- */
 public class YunkuAuth {
 
-    private static final String TAG = "YunkuAuth";
-
-    static {
-        new ConfigHelper().client(ClientConfig.CLIENT_ID,ClientConfig.CLIENT_SECRET).config();
-    }
-
     public static void main(String[] args) {
-
-        loginByAccount();
-
-        loginByAccountAsync();
-
-        refreshToken();
-
+        try {
+            auth();
+        } catch (YunkuException e) {
+            e.printStackTrace();
+        }
     }
 
-    /**
-     * 账号密码登录
-     */
-    private static void loginByAccount() {
+    //获取用户授权
+    public static void auth() throws YunkuException {
+        //注意, 必须初始化配置
+        YunkuConfig.init();
 
-        LogPrint.info(TAG, "====== loginByAccount\n");
-        //账号密码登录
-        String returnString = YKHttpEngine.getInstance().loginSync("test", "test");
-        DeserializeHelper.getInstance().deserializeResult(returnString);
+        //帐号密码方式登录
+        String username = "";
+        String password = "";
 
+        if (!YKUtil.isEmpty(username) && !YKUtil.isEmpty(password)) {
+            loginByAccount(username, password);
+            return;
+        }
+
+        //一站式登录
+        String account = "";
+
+        //企业管理后台开通的授权
+        String clientId = "";
+        String secret = "";
+
+        if (!YKUtil.isEmpty(account) && !YKUtil.isEmpty(clientId) && !YKUtil.isEmpty(secret)) {
+            ssoLogin(account, clientId, secret);
+            return;
+        }
+        throw new YunkuException("login params not set");
     }
 
-    /**
-     * 账号密码登录(异步)
-     */
-    private static void loginByAccountAsync() {
+    //帐号密码登录
+    public static void loginByAccount(String username, String password) throws YunkuException {
+        ReturnResult result = YKHttpEngine.getInstance().login(username, password);
 
-        LogPrint.info(TAG, "====== loginByAccountAsync\n");
-
-        YKHttpEngine.getInstance().loginAsync("test", "test", new HttpEngine.DataListener() {
-            @Override
-            public void onReceivedData(int apiId, Object object, int errorId) {
-                if (apiId == YKHttpEngine.API_ID_LOGIN) {
-                    ReturnResult returnResult = ReturnResult.create(object.toString());
-                    if (returnResult != null) {
-                        LogPrint.info(TAG, "onReceivedData => code" + returnResult.getStatusCode()
-                                + "，result：" + returnResult.getResult());
-                    }
-                }
-
-            }
-        });
+        if (!result.isOK()) {
+            throw new YunkuException("fail to login", result);
+        }
     }
 
+    //一站式登录
+    public static void ssoLogin(String account, String clientId, String secret) throws YunkuException {
+        //sso登录, 获取key
+        ReturnResult result = YKHttpEngine.getInstance().ssoLogin(account, clientId, secret);
 
-    /**
-     * 刷新token
-     */
-    private static void refreshToken() {
+        if (!result.isOK()) {
+            throw new YunkuException("fail to sso", result);
+        }
 
-        LogPrint.info(TAG, "====== refreshToken\n");
+        JSONObject json = new JSONObject(result.getBody());
+        String key = json.optString("gkkey");
 
-        boolean success = YKHttpEngine.getInstance().refreshToken();
+        //使用gkkey登录
+        result = YKHttpEngine.getInstance().loginByKey(key);
 
-        System.out.println("refreshtoken:success" + success);
-
+        if (!result.isOK()) {
+            throw new YunkuException("fail to login by key", result);
+        }
     }
-
-
 }

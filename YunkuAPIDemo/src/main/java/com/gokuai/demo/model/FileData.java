@@ -1,32 +1,25 @@
 package com.gokuai.demo.model;
 
+import com.gokuai.base.ReturnResult;
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 文件信息
  * Created by Brandon on 2017/4/21.
  */
 public class FileData {
-
-    String fullPath;
-    long fileSize;
+    JSONObject json;
+    int mountId;
+    String fullpath;
+    int dir;
+    String fileName;
     String hash;
     String fileHash;
-    int dir;
-    int mountId;
-    String fileName;
-
-    public static FileData create(JSONObject jsonObject) {
-        FileData filedata = new FileData();
-        filedata.fullPath = jsonObject.optString("fullpath");
-        filedata.fileName = jsonObject.optString("filename");
-        filedata.hash = jsonObject.optString("hash");
-        filedata.fileSize = jsonObject.optLong("filesize");
-        filedata.fileHash = jsonObject.optString("filehash");
-        filedata.dir = jsonObject.optInt("dir");
-        filedata.mountId = jsonObject.optInt("mount_id");
-        return filedata;
-    }
+    long fileSize;
 
     public String getFileName() {
         return fileName;
@@ -36,12 +29,12 @@ public class FileData {
         this.fileName = fileName;
     }
 
-    public String getFullPath() {
-        return fullPath;
+    public String getFullpath() {
+        return fullpath;
     }
 
-    public void setFullPath(String fullPath) {
-        this.fullPath = fullPath;
+    public void setFullpath(String fullpath) {
+        this.fullpath = fullpath;
     }
 
     public long getFileSize() {
@@ -68,11 +61,39 @@ public class FileData {
         this.fileHash = fileHash;
     }
 
-    public int getDir() {
-        return dir;
+    public boolean isDir() {
+        return dir == 1;
     }
 
     public void setDir(int dir) {
         this.dir = dir;
+    }
+
+    public String toString() {
+        return json.toString();
+    }
+
+    public static FileData create(JSONObject jsonObject) {
+        FileData data = new FileData();
+        data.json = jsonObject;
+        data.mountId = jsonObject.optInt("mount_id");
+        data.fullpath = jsonObject.optString("fullpath");
+        data.dir = jsonObject.optInt("dir");
+        data.fileName = jsonObject.optString("filename");
+        data.hash = jsonObject.optString("hash");
+        data.fileHash = jsonObject.optString("filehash");
+        data.fileSize = jsonObject.optLong("filesize");
+        return data;
+    }
+
+    public static List<FileData> createList(ReturnResult result) {
+        List<FileData> list = new ArrayList<FileData>();
+        JSONObject json = new JSONObject(result.getBody());
+        JSONArray jsonArray = json.optJSONArray("list");
+        for (int i = 0; i < jsonArray.length(); i++) {
+            FileData data = FileData.create(jsonArray.optJSONObject(i));
+            list.add(data);
+        }
+        return list;
     }
 }

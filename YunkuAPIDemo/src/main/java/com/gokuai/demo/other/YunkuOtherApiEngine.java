@@ -1,6 +1,7 @@
 package com.gokuai.demo.other;
 
 import com.gokuai.base.RequestMethod;
+import com.gokuai.base.ReturnResult;
 import com.gokuai.cloud.YKConfig;
 import com.gokuai.cloud.transinterface.YKHttpEngineExtraBase;
 
@@ -42,7 +43,7 @@ public class YunkuOtherApiEngine extends YKHttpEngineExtraBase {
 
 
 
-    public String otherApiRequest(String param1,String params2) {
+    public ReturnResult otherApiRequest(String param1, String params2) {
         HashMap<String, String> params = new HashMap<>();
         params.put("param1 key", param1);
         params.put("param2 key", params2);

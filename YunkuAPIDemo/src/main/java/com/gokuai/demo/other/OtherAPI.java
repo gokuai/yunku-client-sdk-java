@@ -5,7 +5,7 @@ package com.gokuai.demo.other;
  */
 public class OtherAPI {
     public static void main(String[] args) {
-        YunkuOtherApiEngine.getInstance().loginSync("[account]", "[password]");
+        YunkuOtherApiEngine.getInstance().login("[account]", "[password]");
         YunkuOtherApiEngine.getInstance().otherApiRequest("[param1]", "[param2]");
 
     }

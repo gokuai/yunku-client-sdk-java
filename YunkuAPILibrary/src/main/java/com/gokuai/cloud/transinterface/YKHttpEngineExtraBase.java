@@ -1,6 +1,7 @@
 package com.gokuai.cloud.transinterface;
 
 import com.gokuai.base.RequestMethod;
+import com.gokuai.base.ReturnResult;
 
 import java.util.HashMap;
 
@@ -20,7 +21,7 @@ public class YKHttpEngineExtraBase extends YKHttpEngine {
      * @param params
      * @return
      */
-    protected String callApi(RequestMethod method, String url, HashMap<String, String> params) {
+    protected ReturnResult callApi(RequestMethod method, String url, HashMap<String, String> params) {
         params.put("sign", generateSign(params));
         String apiUrl = URL_API + url;
         return new RequestHelper().setUrl(apiUrl).setParams(params).setMethod(method).executeSync();

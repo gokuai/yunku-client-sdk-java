@@ -645,13 +645,13 @@ list说明：
 ---
 
 ### 获取库信息
-	getLibInfo(int mountId, int orgId)
+	getLibInfo(int id, int orgId)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | 库MOUNTID |
+| id | 是 | int | 库MOUNTID |
 | orgId | 是 | int | 库ID |
 
 #### 返回结果
@@ -1230,14 +1230,14 @@ list说明：
 ## **文件API**
 
 ### 锁定文件
-	lock(final String fullPath, final int mountId, int lock)
+	lock(final String fullpath, final int id, int lock)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| fullPath | 是 | string | 文件的路径 |
-| mountId | 是 | int | 库空间ID |
+| fullpath | 是 | string | 文件的路径 |
+| id | 是 | int | 库空间ID |
 | lock | 是 | int | 锁定或解锁的标示，"lock"：锁定，"unlock":解锁 |
 
 #### 返回结果
@@ -1247,13 +1247,13 @@ list说明：
 ---
 
 ### 文件最近更新列表
-	getFileUpdates(int mountId, long msdateline, int size)
+	getFileUpdates(int id, long msdateline, int size)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | 库空间id |
+| id | 是 | int | 库空间id |
 | msdateline | 是 | int | 查询当前时间戳(毫秒)之前的文件, 第一次0 |
 | size | 否 | int | 获取数量, 默认500 |
 
@@ -1278,15 +1278,15 @@ list说明：
 ---
 
 ### 获取文件分享链接
-	getFileLink(String fullPath, int mountId, final String deadline,
+	getFileLink(String fullpath, int id, final String deadline,
                                   final String auth, final String password, final String scope, final String day)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| fullPath | 是 | string | fullpath |
-| mountId | 是 | int | mount_id |
+| fullpath | 是 | string | fullpath |
+| id | 是 | int | mount_id |
 | deadline | 否 | string | 过期的时间戳,-1 表示永不失效 ，不传默认过期时间2天 |
 | auth | 否 | string | 见下表 ，不传表示无权限 |
 | password | 否 | string | 是否需要密码，不传表示不设置密码 |
@@ -1312,14 +1312,14 @@ list说明：
 ---
 
 ### 设置文件描述
-	setFileKeyWord(int mountId, String fullPath, String keywords)
+	setFileKeyWord(int id, String fullpath, String keywords)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
-| fullPath | 是 | string | 文件的路径 |
+| id | 是 | int | mount_id |
+| fullpath | 是 | string | 文件的路径 |
 | keywords | 是 | string | 关键字 |
 
 #### 返回结果
@@ -1451,14 +1451,14 @@ list说明：
 ---
 
 ### 获取对应路径的权限
-	getPermissionOfList(int mountId, String fullPath)
+	getPermissionOfList(int id, String fullpath)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
-| fullPath | 是 | string | 文件的路径 |
+| id | 是 | int | mount_id |
+| fullpath | 是 | string | 文件的路径 |
 
 #### 返回结果
 
@@ -1467,14 +1467,14 @@ list说明：
 ---
 
 ### 获取文件列表
-	getFileListSync(final int mountId, final String fullPath, int start, int size)
+	getFileListSync(final int id, final String fullpath, int start, int size)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
-| fullPath | 是 | int | 文件的路径 |
+| id | 是 | int | mount_id |
+| fullpath | 是 | int | 文件的路径 |
 | start | 否 | int | 开始条数 |
 | size | 否 | int | 获取数量(默认100) |
 
@@ -1528,13 +1528,13 @@ list说明：
 ---
 
 ### 制定hash文件
-	getFileListByHashs(int mountId, int start, int size, String[] hashs)
+	getFileListByHashs(int id, int start, int size, String[] hashs)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | start | 否 | int | 开始条数  |
 | size | 否 | int | 获取数量(默认100) |
 | hashs | 是 | string[] | json字符串(获取指定hash文件) |
@@ -1546,14 +1546,14 @@ list说明：
 ---
 
 ### 上传文件
-	uploadFile(int mountId, String fullPath, String opName, String localPath, boolean overWrite)
+	uploadFile(int id, String fullpath, String opName, String localPath, boolean overWrite)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
-| fullPath | 是 | string | 文件路径 |
+| id | 是 | int | mount_id |
+| fullpath | 是 | string | 文件路径 |
 | opName | 否 | string | 上传人名称 |
 | localPath | 是 | string | 本地路径 |
 | overWrite | 是 | boolean | 是否重写 |
@@ -1570,12 +1570,12 @@ list说明：
 ---
 	
 ### 文件分块上传
-	uploadByBlock(int mountId, String fullPath, String localFilePath,
+	uploadByBlock(int id, String fullpath, String localFilePath,
                                             int rangSize, UploadCallBack callBack)
 #### 参数 
 | 参数 | 必须 | 类型 | 说明 |	
 |------|------|------|------|
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullpath | 是 | string | 文件路径 |
 | localFilePath | 是 | string | 文件本地路径 |
 | rangSize | 否 | int | 分块上传大小，不传默认为512K |
@@ -1584,12 +1584,12 @@ list说明：
 ---
 
 ### 数据流分块上传
-	uploadByBlock(int mountId, String fullPath, InputStream localFilePath,
+	uploadByBlock(int id, String fullpath, InputStream localFilePath,
                                             int rangSize, UploadCallBack callBack)
 #### 参数 
 | 参数 | 必须 | 类型 | 说明 |	
 |------|------|------|------|
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullpath | 是 | string | 文件路径 |
 | inputStream | 是 | InputStream | 流数据 |
 | rangSize | 否 | int | 分块上传大小，不传默认为512K |
@@ -1598,13 +1598,13 @@ list说明：
 ---  
 
 ### 批量删除文件文件夹
-	batchDeleteFileAsync(final int mountId, final ArrayList<String> fullPaths)
+	batchDeleteFileAsync(final int id, final ArrayList<String> fullPaths)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullPaths | 是 | ArrayList | 文件路径 |
 
 #### 返回结果
@@ -1614,14 +1614,14 @@ list说明：
 ---
 
 ### 文件复制
-	fileBatchCopy(final int mountId, final ArrayList<String> fullPaths,
+	fileBatchCopy(final int id, final ArrayList<String> fullPaths,
                                     final int targetMountId, final String targetFullPath)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullPaths | 是 | ArrayList | 文件路径 |
 | targetMountId | 是 | int | 复制到的mount_id |
 | targetFullPath | 是 | string | 复制到的路径 |
@@ -1659,14 +1659,14 @@ list说明：
 ---
 
 ### 文件移动
-	fileBatchMove(final int mountId, final ArrayList<String> fullPaths,
+	fileBatchMove(final int id, final ArrayList<String> fullPaths,
                                     final int targetMountId, final String targetFullPath)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullPaths | 是 | ArrayList | 文件路径 |
 | targetMountId | 是 | int | 复制到的mount_id |
 | targetFullPath | 是 | string | 复制到的路径 |
@@ -1709,13 +1709,13 @@ list说明：
 ---
 
 ### 根据文件filehash获取文件路径
-	getDownloadFileUrlByFileHash(int mountId, String filehash)
+	getDownloadFileUrlByFileHash(int id, String filehash)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | filehash | 是 | string | filehash |
 
 #### 返回结果
@@ -1728,14 +1728,14 @@ list说明：
 ---
 
 ### 根据filehash获取文件
-	getUrlByFileHash(final int mountId, final String fileHash, final String net, 
+	getUrlByFileHash(final int id, final String fileHash, final String net, 
 	                                    final boolean isOpen, final DataListener listener)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | filehash | 是 | string | filehash |
 | net | 否| string | 返回下载地址公网/内网(in-内网，不传默认公网) |
 | isOpen | 否 | string | 是否打开改文件(不传默认false) |
@@ -1751,14 +1751,14 @@ list说明：
 ---
 
 ### 设置文件权限
-	setFilePermission(final int mountId, final String fullpath, 
+	setFilePermission(final int id, final String fullpath, 
 	                                    final String permission, final boolean isGroup)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullpath | 是 | string | 文件fullpath |
 | isGroup | 否 | string | 是否为设置部门权限, 1:是;0:否 |
 | permission | 否 | json | 格式如下 |
@@ -1784,13 +1784,13 @@ list说明：
 ---
 
 ### 获取成员的文件夹权限
-	getMemberFolderPermission(final int mountId, final String fullpath, int start, int size)
+	getMemberFolderPermission(final int id, final String fullpath, int start, int size)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullpath | 是 | string | 文件fullpath |
 | start | 否 | int | start |
 | size | 否 | int | 返回大小 |
@@ -1817,13 +1817,13 @@ list说明：
 ---
 
 ### 获取部门文件夹权限
-	getGroupFolderPermission(final int mountId, final String fullpath, int start, int size)
+	getGroupFolderPermission(final int id, final String fullpath, int start, int size)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullpath | 是 | string | 文件fullpath |
 | start | 否 | int | start |
 | size | 否 | int | 返回大小 |
@@ -1849,14 +1849,14 @@ list说明：
 ---
 
 ### 获取单文件数据
-	getFileInfoSync(final String fullPath, int mountId, String hid)
+	getFileInfoSync(final String fullpath, int id, String hid)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| fullPath | 是 | int | 文件路径 |
-| mountId | 是 | string | mount_id |
+| fullpath | 是 | int | 文件路径 |
+| id | 是 | string | mount_id |
 | hid | 否 | string | 版本ID |
 
 #### 返回结果
@@ -1878,14 +1878,14 @@ list说明：
 ---
 
 ### 根据hash获取文件信息
-	getFileInfoByHash(String hash, int mountId)
+	getFileInfoByHash(String hash, int id)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
 | hash | 是 | string | 路径hash |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 
 #### 返回结果
 
@@ -1906,14 +1906,14 @@ list说明：
 ---
 
 ### 获取文件夹属性
-	getFolderAttribute(int mountId, String fullPath, String hash)
+	getFolderAttribute(int id, String fullpath, String hash)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
-| fullPath | 是 | string | 文件的路径 |
+| id | 是 | int | mount_id |
+| fullpath | 是 | string | 文件的路径 |
 | hash | 是 | string | 路径hash |
 
 #### 返回结果
@@ -1926,14 +1926,14 @@ list说明：
 ---
 
 ### 打开文件
-	getDownloadFileUrlByPath(final int mountId, final String fullPath, String hid)
+	getDownloadFileUrlByPath(final int id, final String fullpath, String hid)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
-| fullPath | 是 | string | 文件的路径 |
+| id | 是 | int | mount_id |
+| fullpath | 是 | string | 文件的路径 |
 | hid | 否 | string | 版本ID(该版本文件是否存在) |
 
 #### 返回结果
@@ -1951,13 +1951,13 @@ list说明：
 ---
 
 ### 文件是否存在
-	fileExistByHash(final String hash, final int mountId)
+	fileExistByHash(final String hash, final int id)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | hash | 是 | string | 路径hash |
 
 #### 返回结果
@@ -1967,14 +1967,14 @@ list说明：
 | hash | string | 路径hash |
 | fullpath | string | 文件的路径 |
 
-	 fileExistByFullPath(final String fullPath, final int mountId)
+	 fileExistByFullPath(final String fullpath, final int id)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
-| fullPath | 是 | string | 文件的路径 |
+| id | 是 | int | mount_id |
+| fullpath | 是 | string | 文件的路径 |
 
 #### 返回结果
 
@@ -1986,13 +1986,13 @@ list说明：
 ---
 
 ### 创建文件夹
-	createFolder(int mountId, String fullpath)
+	createFolder(int id, String fullpath)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullpath | 是 | string | 文件夹路径 |
 
 #### 返回结果
@@ -2005,7 +2005,7 @@ list说明：
 ---
 
 ### 新建文件、文件夹
-	addFile(int mountId, String fullpath, String filehash, long filesize)
+	addFile(int id, String fullpath, String filehash, long filesize)
 	
 #### 参数
 
@@ -2034,14 +2034,14 @@ list说明：
 ---
 
 ### 离线下载
-	createOffline(int mountId, String path, String fileName, String downloadUrl, 
+	createOffline(int id, String path, String fileName, String downloadUrl, 
 	                                        String token, final DataListener listener)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | path | 是 | string | 上级文件夹路径 |
 | fileName | 是 | string | 文件名称 |
 | downloadUrl | 是 | string | 要离线的文件url |
@@ -2068,13 +2068,13 @@ list说明：
 ---
 
 ### 获取文件（夹）操作历史
-	getHistory(final int mountId, final String fullPath)
+	getHistory(final int id, final String fullpath)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullpath | 是 | string | 文件夹路径 |
 
 #### 返回结果
@@ -2099,13 +2099,13 @@ list说明：
 ---
 
 ### 恢复文件
-	revert(final String fullPath, final int mountId, final String hid)
+	revert(final String fullpath, final int id, final String hid)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | 库空间id |
+| id | 是 | int | 库空间id |
 | hid | 是 | int | 要还原的版本ID |
 | fullpath | 是 | string | 文件夹路径 |
 
@@ -2116,15 +2116,15 @@ list说明：
 ---
 
 ### 文件转存
-	fileSave(int mountId, String fullPath, String fileName, String fileHash,
+	fileSave(int id, String fullpath, String fileName, String fileHash,
 	long fileSize, int targetMountId, String targetFullPath, String dialogId)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | 要转存的mount_id |
-| fullPath | 否 | string | 要转存文件fullPath(转存文件夹时) |
+| id | 是 | int | 要转存的mount_id |
+| fullpath | 否 | string | 要转存文件fullPath(转存文件夹时) |
 | fileName | 是 | string | 要转存文件名称 |
 | fileHash | 否 | string | 要转存文件hash(转存文件时) |
 | fileSize | 否 | int | 要转存文件大小(转存文件时) |
@@ -2142,13 +2142,13 @@ list说明：
 ---
 
 ### 搜索文件
-	fileSearch(final String keyword, final int mountId)
+	fileSearch(final String keyword, final int id)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | keyword | 是 | string | 关键字 |
 
 #### 返回结果
@@ -2159,13 +2159,13 @@ list说明：
 ---
 
 ### 文件添加备注
-	addFileRemark(final int mountId, final String fullPath, final String message)
+	addFileRemark(final int id, final String fullpath, final String message)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullpath | 是 | string | 文件夹路径 |
 | message | 是 | string | 备注内容 |
 
@@ -2176,13 +2176,13 @@ list说明：
 ---
 
 ### 文件备注列表
-	getFileRemarkList(final int mountId, final String fullPath, final int start, final int size)
+	getFileRemarkList(final int id, final String fullpath, final int start, final int size)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullpath | 是 | string | 文件夹路径 |
 | start | 否 | int | 开始条数 |
 | size | 否 | int | 获取数量(默认20) |
@@ -3015,13 +3015,13 @@ list的数据结构
 ---
 
 ### 创建文件夹
-	createFolder(int mountId, String fullpath)
+	createFolder(int id, String fullpath)
 	
 #### 参数
 
 | 参数 | 必须 | 类型 | 说明 |
 | --- | --- | --- | --- |
-| mountId | 是 | int | mount_id |
+| id | 是 | int | mount_id |
 | fullpath | 是 | string | 文件夹路径 |
 
 #### 返回结果

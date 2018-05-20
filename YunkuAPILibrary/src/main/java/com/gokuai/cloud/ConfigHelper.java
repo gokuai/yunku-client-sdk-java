@@ -3,6 +3,8 @@ package com.gokuai.cloud;
 import com.gokuai.base.DebugConfig;
 import com.gokuai.base.NetConnection;
 import com.gokuai.base.utils.Util;
+import com.gokuai.cloud.transinterface.YKHttpEngine;
+import com.gokuai.library.net.UploadManager;
 
 import java.net.Proxy;
 
@@ -11,28 +13,32 @@ import java.net.Proxy;
  * Created by Brandon on 2017/4/19.
  */
 public class ConfigHelper {
-
-
-    private final static String HTTPS = "https://";
-    private final static String HTTP = "http://";
-
-
     private String mClientId;
-    private String mClientSecret;
-    private boolean mLogVisible;
-    private boolean mHttps;
+    private String mSecret;
     private String mEntDomain;
     private String mApiHost;
     private String mWebHost;
     private Proxy mProxy;
+    private String mUserAgent;
+    private String mLanguage;
+    private long mConnectTimeout;
+    private long mTimeout;
+    private int mBlockSize;
+    private int mRetry;
+    private boolean mDebug;
+
+    public ConfigHelper(String clientId, String secret) {
+        mClientId = clientId;
+        mSecret = secret;
+    }
 
     /**
-     * 更改日志可见行
+     * 是否开启debug模式
      *
-     * @param visible
+     * @param debug
      */
-    public ConfigHelper logVisible(boolean visible) {
-        mLogVisible = visible;
+    public ConfigHelper debug(boolean debug) {
+        mDebug = debug;
         return this;
     }
 
@@ -41,16 +47,6 @@ public class ConfigHelper {
      */
     public ConfigHelper domain(String entDomain) {
         mEntDomain = entDomain;
-        return this;
-    }
-
-    /**
-     * 更改https
-     *
-     * @param https
-     */
-    public ConfigHelper https(boolean https) {
-        mHttps = https;
         return this;
     }
 
@@ -65,7 +61,6 @@ public class ConfigHelper {
         return this;
     }
 
-
     /**
      * 更改Web host
      *
@@ -77,7 +72,6 @@ public class ConfigHelper {
         return this;
     }
 
-
     /**
      * 更改代理设置
      *
@@ -85,15 +79,74 @@ public class ConfigHelper {
      * @return
      */
     public ConfigHelper proxy(Proxy proxy) {
-
         mProxy = proxy;
         return this;
     }
 
+    /**
+     * HTTP请求的User-Agent
+     *
+     * @param userAgent
+     * @return
+     */
+    public ConfigHelper userAgent(String userAgent) {
+        this.mUserAgent = userAgent;
+        return this;
+    }
 
-    public ConfigHelper client(String clientId, String clientSecret) {
-        mClientId = clientId;
-        mClientSecret = clientSecret;
+    /**
+     * 语言环境
+     *
+     * @param language
+     * @return
+     */
+    public ConfigHelper language(String language) {
+        this.mLanguage = language;
+        return this;
+    }
+
+    /**
+     * 分块上传单块大小, 单位字节
+     *
+     * @return
+     */
+    public ConfigHelper blockSize(int blockSize) {
+        this.mBlockSize = blockSize;
+        return this;
+    }
+
+    /**
+     * 网络连接超时
+     *
+     * @param timeoutSeconds
+     * @return
+     */
+    public ConfigHelper connectTimeout(long timeoutSeconds) {
+        this.mConnectTimeout = timeoutSeconds;
+        return this;
+    }
+
+    /**
+     * 网络执行超时
+     *
+     * @param timeoutSeconds
+     * @return
+     */
+    public ConfigHelper timeout(long timeoutSeconds) {
+        this.mTimeout = timeoutSeconds;
+        return this;
+    }
+
+    /**
+     * 接口访问失败后重试几次
+     *
+     * @param retry
+     * @return
+     */
+    public ConfigHelper retry(int retry) {
+        if (retry > 0) {
+            this.mRetry = retry;
+        }
         return this;
     }
 
@@ -101,46 +154,57 @@ public class ConfigHelper {
      * 配置参数
      */
     public void config() {
-        YKConfig.SCHEME_PROTOCOL = mHttps ? HTTPS : HTTP;
-
-        // FIXME: 联系够快开发人员获取需要的CLIENT_ID，CLIENT_SECRET 参数
-
-        if (Util.isEmpty(mApiHost)) {
-            YKConfig.URL_API_HOST = "yk3.gokuai.com/m-api";
-        } else {
-            YKConfig.URL_API_HOST = mApiHost;
-        }
-
         if (Util.isEmpty(mWebHost)) {
-            YKConfig.URL_HOST = "yk3.gokuai.com";
+            YKConfig.URL_HOST = "http://yk3.gokuai.com";
         } else {
             YKConfig.URL_HOST = mWebHost;
         }
 
-        YKConfig.CLIENT_ID = mClientId;
-        YKConfig.CLIENT_SECRET = mClientSecret;
-
-        if (Util.isEmpty(YKConfig.CLIENT_ID) || Util.isEmpty(YKConfig.CLIENT_SECRET)) {
-            throw new IllegalArgumentException("CLIENT_ID CLIENT_SECRET can not be empty!!");
+        if (Util.isEmpty(mApiHost)) {
+            YKConfig.URL_API_HOST = "http://yk3.gokuai.com/m-api";
+        } else {
+            YKConfig.URL_API_HOST = mApiHost;
         }
 
-        String url = YKConfig.SCHEME_PROTOCOL + YKConfig.URL_HOST;
+        YKConfig.CLIENT_ID = mClientId;
+        YKConfig.CLIENT_SECRET = mSecret;
 
-
+        String url = YKConfig.URL_HOST;
         YKConfig.URL_USER_AVATAR_FORMAT_BY_NAME = url + "/index/avatar?name=%s";
         YKConfig.URL_USER_AVATAR_FORMAT = url + "/index/avatar?id=%d&org_id=%d&name=%s";
         YKConfig.URL_USER_AVATAR_FORMAT_BY_MEMBERID = url + "/index/avatar?id=%d";
-
         YKConfig.FILE_THUMBNAIL_FORMAT = url + "/index/thumb?hash=%s&filehash=%s&type=%s&mount_id=%s";
-
         YKConfig.URL_ACCOUNT_AUTO_LOGIN = url + "/account/autologin/entgrant?client_id=%s&ticket=%s&returnurl=%s&format=%s";
 
-        DebugConfig.PRINT_LOG = mLogVisible;
+        DebugConfig.DEBUG = mDebug;
         YKConfig.ENT_DOMAIN = mEntDomain;
 
-        //TODO 设置代理
         if (!(mProxy == null)){
             NetConnection.setProxy(mProxy);
+        }
+        if (!Util.isEmpty(mUserAgent)) {
+            NetConnection.setUserAgent(mUserAgent);
+        }
+
+        if (mConnectTimeout > 0) {
+            NetConnection.setConnectTimeout(mConnectTimeout);
+        }
+
+        if (mTimeout > 0) {
+            NetConnection.setTimeout(mTimeout);
+        }
+
+        if (!Util.isEmpty(mLanguage)) {
+            NetConnection.setAcceptLanguage(mLanguage);
+        }
+
+        if (this.mBlockSize > 0) {
+            YKHttpEngine.setDefaultBlockSize(this.mBlockSize);
+        }
+
+        if (this.mRetry > 0) {
+            NetConnection.setRetry(mRetry);
+            UploadManager.setRetry(mRetry);
         }
     }
 }

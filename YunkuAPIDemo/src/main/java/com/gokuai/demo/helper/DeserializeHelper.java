@@ -2,7 +2,6 @@ package com.gokuai.demo.helper;
 
 import com.gokuai.base.ReturnResult;
 import com.gokuai.library.data.BaseData;
-import java.net.HttpURLConnection;
 
 /**
  * Created by Brandon on 2016/10/12.
@@ -26,26 +25,25 @@ public class DeserializeHelper {
      *
      * @param result
      */
-    public void deserializeResult(String result) {
-
-        //解析结果
-        ReturnResult returnResult = ReturnResult.create(result);
-
-        if (returnResult.getStatusCode() == HttpURLConnection.HTTP_OK) {
+    public void deserializeResult(ReturnResult result) {
+        if (result.isOK()) {
             //成功的结果
-            System.out.println("return 200");
-
+            System.out.println("result code: " + Integer.toString(result.getCode()));
+            System.out.println("result body: " + result.getBody());
         } else {
-            //解析result中的内容
-            BaseData data = BaseData.create(returnResult.getResult());
-            if (data != null) {
-                //如果可解析，则返回错误信息和错误号
-                System.out.println("\ndeserializeResult:" + data.getErrorCode() + ":" + data.getErrorMsg());
+            if (result.getException() != null) {
+                //出现网络或IO错误
+                result.getException().printStackTrace();
+            } else {
+                System.out.println("http response code: " + result.getCode() + ", body: " + result.getBody());
+
+                //解析result中的内容
+                BaseData data = BaseData.create(result.getBody());
+                if (data != null) {
+                    //如果可解析，则返回错误信息和错误号
+                    System.out.println(data.getErrorCode() + ":" + data.getErrorMsg());
+                }
             }
         }
-        System.out.println(returnResult.getResult());
-
-        //复制到剪贴板
-//        Util.copyToClipboard(returnResult.getResult());
     }
 }
