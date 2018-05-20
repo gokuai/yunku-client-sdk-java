@@ -22,7 +22,7 @@
 
 ```groovy
 	dependencies {
-	        compile 'com.github.gokuai.yunku-client-sdk-java:YunkuAPILibrary:3.7'
+	        compile 'com.github.gokuai.yunku-client-sdk-java:YunkuAPILibrary:4.2'
 	}
 ```
 或者Maven：
@@ -40,13 +40,28 @@
 	<dependency>
 	    <groupId>com.github.gokuai.yunku-client-sdk-java</groupId>
 	    <artifactId>YunkuAPILibrary</artifactId>
-	    <version>3.7</version>
+	    <version>4.2</version>
 	</dependency>
 ```
 
 ## 初始化
 
 使用云库3.0的用户API，需向你的企业管理员提出开发授权申请, 或联系我们 400-6110-860 以获取调用API的 `client_id` 和 `client_secret`
+
+**初始化配置**
+
+```
+new ConfigHelper(clientId, secret)
+                .webHost("http://webhost")
+                .apiHost("http://webhost/m-api")
+                .language("zh-CN")
+                .config();
+```
+
+* `clientId`和`secret` 是够快分配的用户API授权
+* `webHost` 是网站地址, 公有云默认为`http://yk3.gokuai.com`
+* `apiHost` 是API地址, 公有云默认为`http://yk3.gokuai.com/m-api`
+* `language` 多语言环境, `zh-CN`表示中文, `en-US`表示英文
 
 ## 参数使用
 
