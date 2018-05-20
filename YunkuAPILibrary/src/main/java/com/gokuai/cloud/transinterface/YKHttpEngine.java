@@ -297,7 +297,7 @@ public class YKHttpEngine extends HttpEngine implements IAuthRequest {
         map.put("account", account);
         map.put("n", YKUtil.getSixRandomChars());
         map.put("t", Long.toString(Util.getUnixDateline()));
-        map.put("sign", this.generateSign(map));
+        map.put("sign", this.generateSign(map, secret));
 
         String ticket = URLEncoder.encodeUTF8(Base64.encodeBytes(new Gson().toJson(map).getBytes()));
         String url = String.format(YKConfig.URL_ACCOUNT_AUTO_LOGIN, clientId, ticket, returnUrl, format);

@@ -139,7 +139,7 @@ public class YunkuWidget {
     //选择一个文件或进入目录
     private int chooseFile() throws YunkuException {
         System.out.println("choose a file or enter a folder:");
-        System.out.print(this.orgName + "/" + this.fullpath + " ");
+        System.out.print(this.orgName + "/" + this.fullpath + "> ");
 
         Scanner scanner = new Scanner(System.in);
         int index = scanner.nextInt();
