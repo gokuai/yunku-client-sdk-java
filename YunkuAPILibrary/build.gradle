@@ -14,6 +14,6 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.gokuai.yunku-sdk-java:GokuaiBase:4.3'
+    compile 'com.github.gokuai.yunku-sdk-java:GokuaiBase:4.4'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
