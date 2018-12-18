@@ -27,26 +27,4 @@ public class YKConfig extends Config {
     public static String URL_ACCOUNT_AUTO_LOGIN;
 
     //====================================================
-
-    public final static String[] EXCEPT_INNER_SERVER = {"gokuai.com", "goukuai.cn", "aliyuncs.com"};
-
-    /**
-     * @param urlString
-     * @return
-     */
-    public static boolean isInnerServerSite(String urlString) {
-        try {
-            URL url = new URL(urlString);
-            for (String suffix : EXCEPT_INNER_SERVER) {
-                if (url.getHost().endsWith(suffix)) {
-                    return false;
-                }
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-
 }

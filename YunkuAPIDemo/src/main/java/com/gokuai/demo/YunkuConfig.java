@@ -8,7 +8,7 @@ public class YunkuConfig {
 
     public static void init() throws YunkuException {
 
-        //调用用户API必须配置够快提供的访问授权
+        //调用用户API必须配置够快提供的用户级访问授权
         String clientId = "";
         String secret = "";
 

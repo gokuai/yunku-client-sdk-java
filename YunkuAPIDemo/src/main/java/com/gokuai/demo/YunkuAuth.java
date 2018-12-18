@@ -18,9 +18,11 @@ public class YunkuAuth {
 
     //获取用户授权
     public static void auth() throws YunkuException {
+
         //注意, 必须初始化配置
         YunkuConfig.init();
 
+        //***********************************************
         //帐号密码方式登录
         String username = "";
         String password = "";
@@ -29,18 +31,25 @@ public class YunkuAuth {
             loginByAccount(username, password);
             return;
         }
+        //***********************************************
 
-        //一站式登录
-        String account = "";
+
+
+        //***********************************************
+        //使用企业成员的帐号完成一站式登录
+        String account = "michael";
 
         //企业管理后台开通的授权
-        String clientId = "";
-        String secret = "";
+        String entClientId = "";
+        String entSecret = "";
 
-        if (!YKUtil.isEmpty(account) && !YKUtil.isEmpty(clientId) && !YKUtil.isEmpty(secret)) {
-            ssoLogin(account, clientId, secret);
+        if (!YKUtil.isEmpty(account) && !YKUtil.isEmpty(entClientId) && !YKUtil.isEmpty(entSecret)) {
+            ssoLogin(account, entClientId, entSecret);
             return;
         }
+        //***********************************************
+
+
         throw new YunkuException("login params not set");
     }
 
@@ -54,9 +63,9 @@ public class YunkuAuth {
     }
 
     //一站式登录
-    public static void ssoLogin(String account, String clientId, String secret) throws YunkuException {
+    public static void ssoLogin(String account, String entClientId, String entSecret) throws YunkuException {
         //sso登录, 获取key
-        ReturnResult result = YKHttpEngine.getInstance().ssoLogin(account, clientId, secret);
+        ReturnResult result = YKHttpEngine.getInstance().ssoLogin(account, entClientId, entSecret);
 
         if (!result.isOK()) {
             throw new YunkuException("fail to sso", result);

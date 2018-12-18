@@ -25,7 +25,6 @@ import java.util.HashMap;
 public class YKHttpEngine extends HttpEngine implements IAuthRequest {
 
     private final static String LOG_TAG = YKHttpEngine.class.getSimpleName();
-    private final static int FILE_SIZE_NONE = -1;
     private static int DEFAULT_BLOCK_SIZE = 10485760;
 
     protected String URL_API = YKConfig.URL_API_HOST;
@@ -34,26 +33,19 @@ public class YKHttpEngine extends HttpEngine implements IAuthRequest {
     protected String token;
     protected String refreshToken;
 
-    private final static String URL_UPDATE_APP = "/update/app";
     private final String URL_API_EXCHANGE_TOKEN = URL_OAUTH;
 
     // 账号相关
-    private final static String URL_API_ACCOUNT_ROLES = "/1/account/roles";
-    private final static String URL_API_GET_ENT_INFO = "/1/account/ent_info";
-    private static final String URL_API_GET_DEVICE_LIST = "/1/account/device_list";
-    private final static String URL_API_GET_ACCOUNT_INFO = "/1/account/info";
-    private final static String URL_API_GET_ACCOUNT_MOUNT = "/1/account/mount";
-    private final static String URL_API_GET_ACCOUNT_ENT = "/1/account/ent";
-    private final static String URL_API_ORG_MEMBERS_LIST = "/1/contact/org_member_list";
-    private static final String URL_API_SET_DEVICE = "/1/account/set_device";
-    private static final String URL_API_CHANGE_DEVICE_STATE = "/1/account/toggle_device";
-    private static final String URL_API_DEL_DEVICE = "/1/account/del_device";
-    private static final String URL_API_DISABLE_NEW_DEVICE = "/1/account/disable_new_device";
-    private static final String URL_API_GET_SERVER_SITE = "/1/account/servers";
+    private static final String URL_API_ACCOUNT_ROLES = "/1/account/roles";
+    private static final String URL_API_GET_ENT_INFO = "/1/account/ent_info";
+    private static final String URL_API_GET_ACCOUNT_INFO = "/1/account/info";
+    private static final String URL_API_GET_ACCOUNT_MOUNT = "/1/account/mount";
+    private static final String URL_API_GET_ACCOUNT_ENT = "/1/account/ent";
+    private static final String URL_API_GET_SERVERS = "/1/account/servers";
     private static final String URL_API_GET_SETTING = "/1/account/setting";
 
     // 成员相关
-    private final static String URL_API_MEMBER_LAST_VISIT = "/1/member/last_visit";
+    private static final String URL_API_MEMBER_RECENT_FILES = "/1/member/last_visit";
 
     //库相关
     private static final String URL_API_LIBRARY_MEMBERS = "/1/library/members";
@@ -75,57 +67,28 @@ public class YKHttpEngine extends HttpEngine implements IAuthRequest {
 
     //通讯录相关
     private static final String URL_API_CONTACT_MEMBER_INFO = "/1/contact/member_info";
-    private static final String URL_API_GROUP_TABLE = "/1/contact/group_table";
-    private static final String URL_API_TOP_MEMBER_LIST = "/1/contact/top_member_list";
-    private final static String URL_API_GROUP_LIST = "/1/contact/group_list";
-    private final static String URL_API_GROUP_MEMBER_LIST = "/1/contact/group_member_list";
-    private final static String URL_API_ENT_MEMBER_LIST = "/1/contact/ent_member_list";
-    private static final String URL_API_UPDATE_CONTACT_GROUP = "/1/contact/update_group";
-    private static final String URL_API_DEL_CONTACT_GROUP = "/1/contact/del_group";
-    private static final String URL_API_ADD_CONTACT_GROUP = "/1/contact/add_group";
-    private static final String URL_API_ADD_CONTACT_MEMBER = "/1/contact/add_member";
-    private static final String URL_API_DEL_CONTACT_MEMBER = "/1/contact/remove_member";
-    private static final String URL_API_UPDATE_CONTACT_MEMBER = "/1/contact/update_member";
-    private static final String URL_API_CONTACT_MEMBER_GROUPS = "/1/contact/member_groups";
-    private static final String URL_API_CONTACT_CHECK_EXIST_MEMBER = "/1/contact/check_exist_member";
-    private static final String URL_API_ADD_GROUP_MEMBER = "/1/contact/add_group_member";
-    private static final String URL_API_REMOVE_GROUP_MEMBER = "/1/contact/remove_group_member";
-    private final static String URL_API_CONTACT_SEARCH_GROUP = "/1/contact/search_group";
-    private final static String URL_API_OUT_ID_TO_MEMBER_ID = "/1/contact/out_id_to_member_id";
-    private final static String URL_API_MEMBER_ID_TO_OUT_ID = "/1/contact/member_id_to_out_id";
 
     //库文件相关
-    private static final String URL_API_COMPARE = "/1/file/compare";
-    private final static String URL_API_FILE_COPY = "/1/file/copy";
-    private final static String URL_API_FILE_MOVE = "/1/file/move";
-    private final static String URL_API_FILE_LIST = "/1/file/ls";
-    private final static String URL_API_FILE_LINK = "/1/file/create_file_link";
-    private final static String URL_API_GET_MEMBER_PERMISSIONS = "/1/file/get_member_permissions";
-    private final static String URL_API_GET_GROUP_PERMISSIONS = "/1/file/get_group_permissions";
-    private final static String URL_API_FILE_UPDATE = "/1/file/updates";
-    private final static String URL_API_FILE_KEYWORD = "/1/file/keyword";
-    private final static String URL_API_FILE_RECENT_MODIFIED = "/1/file/recent_modified";
-    private final static String URL_API_FILE_LOCKED = "/1/file/locked";
-    private final static String URL_API_FILE_UPLOAD_SERVER = "/1/file/upload_server";
-    private final static String URL_API_FILE_UPLOAD = "/1/file/upload";
-    private final static String URL_API_FILE_SAVE = "/1/file/save";
+    private static final String URL_API_FILE_COPY = "/1/file/copy";
+    private static final String URL_API_FILE_MOVE = "/1/file/move";
+    private static final String URL_API_FILE_LIST = "/1/file/ls";
+    private static final String URL_API_FILE_LINK = "/1/file/create_file_link";
+    private static final String URL_API_FILE_UPDATE = "/1/file/updates";
+    private static final String URL_API_FILE_KEYWORD = "/1/file/keyword";
+    private static final String URL_API_FILE_RECENT_MODIFIED = "/1/file/recent_modified";
+    private static final String URL_API_FILE_LOCKED = "/1/file/locked";
+    private static final String URL_API_FILE_UPLOAD_SERVER = "/1/file/upload_server";
+    private static final String URL_API_FILE_UPLOAD = "/1/file/upload";
+    private static final String URL_API_FILE_SAVE = "/1/file/save";
     private static final String URL_API_RENAME = "/1/file/rename";
     private static final String URL_API_LOCK = "/1/file/lock";
     private static final String URL_API_GET_URL_BY_FILEHASH = "/1/file/get_url_by_filehash";
     private static final String URL_API_DELETE = "/1/file/del";
-    private final static String URL_API_CREATE_OFFLINE = "/1/file/create_offline";
-    private static final String URL_API_SET_FILE_PERMISSION = "/1/file/set_permission";
-    private static final String URL_API_GET_FAVORITE = "/1/file/favorites";
-    private static final String URL_API_ADD_FAVORITE = "/1/file/favorites_add";
-    private static final String URL_API_DEL_FAVORITE = "/1/file/favorites_delete";
-    private static final String URL_API_CLEAR_FAVORITE = "/1/file/favorites_clear";
-    private static final String URL_API_SET_FAVORITE_NAME = "/1/file/set_favorite_name";
-    private static final String URL_API_GET_FAVORITE_NAMES = "/1/file/get_favorite_names";
 
     private static final String URL_API_GET_FILE_SAVE = "/2/file/save";
     private static final String URL_API_GET_FILE_URL = "/2/file/url";
-    private final static String URL_API_FILE_SEARCH = "/2/file/search";
-    private final static String URL_API_FILE_EXIST = "/2/file/exist";
+    private static final String URL_API_FILE_SEARCH = "/2/file/search";
+    private static final String URL_API_FILE_EXIST = "/2/file/exist";
     private static final String URL_API_GET_FILE_HISTORY = "/2/file/history";
     private static final String URL_API_REVERT = "/2/file/revert";
     private static final String URL_API_OPEN = "/2/file/open";
@@ -458,7 +421,7 @@ public class YKHttpEngine extends HttpEngine implements IAuthRequest {
     }
 
     public ReturnResult getServers(String type, String storagePoint) {
-        String url = URL_API + URL_API_GET_SERVER_SITE;
+        String url = URL_API + URL_API_GET_SERVERS;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         if (!Util.isEmpty(storagePoint)) {
@@ -723,8 +686,8 @@ public class YKHttpEngine extends HttpEngine implements IAuthRequest {
      * @param size
      * @return
      */
-    public ReturnResult getLastVisitFile(int size) {
-        String url = URL_API + URL_API_MEMBER_LAST_VISIT;
+    public ReturnResult getRecentFiles(int size) {
+        String url = URL_API + URL_API_MEMBER_RECENT_FILES;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("size", Long.toString(size));
@@ -880,16 +843,16 @@ public class YKHttpEngine extends HttpEngine implements IAuthRequest {
      * 根据文件filehash获取文件下载路径
      *
      * @param mountId
-     * @param fileHash
+     * @param filehash
      * @param open
      * @return
      */
-    public ReturnResult getFileUrlByFileHash(int mountId, String fileHash, boolean open) {
+    public ReturnResult getFileUrlByFileHash(int mountId, String filehash, boolean open) {
         String url = URL_API + URL_API_GET_URL_BY_FILEHASH;
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("mount_id", Integer.toString(mountId));
-        params.put("filehash", fileHash);
+        params.put("filehash", filehash);
         params.put("open", (open ? "1" : "0"));
         return new RequestHelper().setParams(params).setUrl(url).setMethod(RequestMethod.GET).setCheckAuth(true).executeSync();
     }
@@ -953,18 +916,18 @@ public class YKHttpEngine extends HttpEngine implements IAuthRequest {
      *
      * @param mountId
      * @param fullpath
-     * @param fileHash
+     * @param filehash
      * @param fileSize
      * @return
      */
-    public ReturnResult addFile(int mountId, String fullpath, String fileHash, long fileSize, boolean overwrite) {
+    public ReturnResult addFile(int mountId, String fullpath, String filehash, long fileSize, boolean overwrite) {
         String url = URL_API + URL_API_CREATE_FILE;
 
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("mount_id", Integer.toString(mountId));
         params.put("fullpath", fullpath);
-        params.put("filehash", fileHash);
+        params.put("filehash", filehash);
         params.put("filesize", Long.toString(fileSize));
         params.put("overwrite", overwrite ? "1" : "0");
         return new RequestHelper().setParams(params)
@@ -1092,9 +1055,9 @@ public class YKHttpEngine extends HttpEngine implements IAuthRequest {
     /**
      * 文件转存
      */
-    public ReturnResult fileSave(int mountId, String fileName, String fileHash, long fileSize, int targetMountId, String targetFullpath) {
+    public ReturnResult fileSave(int mountId, String fileName, String filehash, long fileSize, int targetMountId, String targetFullpath) {
 
-        return fileSave(mountId, "", fileName, fileHash, fileSize, targetMountId, targetFullpath, null);
+        return fileSave(mountId, "", fileName, filehash, fileSize, targetMountId, targetFullpath, null);
     }
 
     /**
@@ -1121,21 +1084,21 @@ public class YKHttpEngine extends HttpEngine implements IAuthRequest {
      * @param mountId
      * @param fullpath
      * @param fileName
-     * @param fileHash
+     * @param filehash
      * @param fileSize
      * @param targetMountId
      * @param targetFullpath
      * @param dialogId
      * @return
      */
-    public ReturnResult fileSave(int mountId, String fullpath, String fileName, String fileHash, long fileSize,
+    public ReturnResult fileSave(int mountId, String fullpath, String fileName, String filehash, long fileSize,
                                  int targetMountId, String targetFullpath, String dialogId) {
         HashMap<String, String> params = new HashMap<>();
         params.put("token", getToken());
         params.put("mount_id", Integer.toString(mountId));
         params.put("filename", fileName);
         params.put("fullpath", fullpath);
-        params.put("filehash", fileHash);
+        params.put("filehash", filehash);
         params.put("filesize", Long.toString(fileSize));
         params.put("target_mount_id", Integer.toString(targetMountId));
         params.put("target_fullpath", targetFullpath);
