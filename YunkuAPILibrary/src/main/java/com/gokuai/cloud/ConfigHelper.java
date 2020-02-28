@@ -23,6 +23,7 @@ public class ConfigHelper {
     private String mLanguage;
     private long mConnectTimeout;
     private long mTimeout;
+    private boolean mTrustSsl = false;
     private int mBlockSize;
     private int mRetry;
     private boolean mDebug;
@@ -91,6 +92,17 @@ public class ConfigHelper {
      */
     public ConfigHelper userAgent(String userAgent) {
         this.mUserAgent = userAgent;
+        return this;
+    }
+
+    /**
+     * 信任https证书
+     *
+     * @param trust
+     * @return
+     */
+    public ConfigHelper trustSsl(boolean trust) {
+        this.mTrustSsl = trust;
         return this;
     }
 
@@ -193,6 +205,8 @@ public class ConfigHelper {
         if (mTimeout > 0) {
             NetConnection.setTimeout(mTimeout);
         }
+
+        NetConnection.trustSsl(mTrustSsl);
 
         if (!Util.isEmpty(mLanguage)) {
             NetConnection.setAcceptLanguage(mLanguage);
