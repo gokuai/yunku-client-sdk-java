@@ -93,6 +93,13 @@ public class UploadManager {
         } catch (IOException e) {
             LogPrint.error(LOG_TAG, e.getMessage());
             throw new YunkuException(e);
+        } finally {
+            if (this.mStream != null) {
+                try {
+                    this.mStream.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 
@@ -116,6 +123,13 @@ public class UploadManager {
                     LogPrint.error(LOG_TAG, e.getMessage());
                     if (mCallback != null) {
                         mCallback.onFail(mFullpath, new YunkuException(e));
+                    }
+                } finally {
+                    if (mStream != null) {
+                        try {
+                            mStream.close();
+                        } catch (IOException e) {
+                        }
                     }
                 }
             }
