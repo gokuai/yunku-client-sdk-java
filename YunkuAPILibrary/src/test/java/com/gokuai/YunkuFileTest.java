@@ -157,7 +157,7 @@ public class YunkuFileTest {
 
     @Test
     public void revert() throws Exception {
-        ReturnResult result = YKHttpEngine.getInstance().fileRevert("v2.png", 1221861, "");
+        ReturnResult result = YKHttpEngine.getInstance().fileRevert(1221861, "v2.png", "");
         Assert.assertEquals(200, result.getCode());
     }
 

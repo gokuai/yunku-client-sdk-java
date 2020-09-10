@@ -42,13 +42,4 @@ public class YunkuLibraryTest {
         ReturnResult r = YKHttpEngine.getInstance().deleteLibrary(0);
         Assert.assertEquals(200, r.getCode());
     }
-
-
-
-    @Ignore("quitLib is ignored")
-    @Test
-    public void quitLib() throws Exception {
-        ReturnResult r = YKHttpEngine.getInstance().quitLibrary(1);
-        Assert.assertEquals(200, r.getCode());
-    }
 }

@@ -10,5 +10,5 @@ repositories {
 
 dependencies {
     compile project(':YunkuAPILibrary')
-    testCompile 'junit:junit:4.12'
+    testCompile 'junit:junit:4.13'
 }
